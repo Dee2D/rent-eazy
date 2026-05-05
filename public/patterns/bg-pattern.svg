@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+
+  <!-- ─── Diamond lattice ──────────────────────────────────── -->
+  <line x1="100" y1="0"   x2="200" y2="100" stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="100" y1="0"   x2="0"   y2="100" stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="0"   y1="100" x2="100" y2="200" stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="200" y1="100" x2="100" y2="200" stroke="#B8894A" stroke-width="0.7"/>
+
+  <!-- Edge-midpoint accent dots (shared across tiles) -->
+  <circle cx="100" cy="0"   r="2.2" fill="#B8894A"/>
+  <circle cx="100" cy="200" r="2.2" fill="#B8894A"/>
+  <circle cx="0"   cy="100" r="2.2" fill="#B8894A"/>
+  <circle cx="200" cy="100" r="2.2" fill="#B8894A"/>
+
+  <!-- ─── Corner quarter-circle ornaments ──────────────────── -->
+  <circle cx="0"   cy="0"   r="26" fill="none" stroke="#B8894A" stroke-width="0.9"/>
+  <circle cx="0"   cy="0"   r="14" fill="none" stroke="#7A9E7A" stroke-width="0.6"/>
+  <circle cx="200" cy="0"   r="26" fill="none" stroke="#B8894A" stroke-width="0.9"/>
+  <circle cx="200" cy="0"   r="14" fill="none" stroke="#7A9E7A" stroke-width="0.6"/>
+  <circle cx="0"   cy="200" r="26" fill="none" stroke="#B8894A" stroke-width="0.9"/>
+  <circle cx="0"   cy="200" r="14" fill="none" stroke="#7A9E7A" stroke-width="0.6"/>
+  <circle cx="200" cy="200" r="26" fill="none" stroke="#B8894A" stroke-width="0.9"/>
+  <circle cx="200" cy="200" r="14" fill="none" stroke="#7A9E7A" stroke-width="0.6"/>
+
+  <!-- ─── Central Adinkra-inspired motif ───────────────────── -->
+
+  <!-- Outer ring with 8 tick marks -->
+  <circle cx="100" cy="100" r="44" fill="none" stroke="#B8894A" stroke-width="1.1"/>
+  <line x1="100" y1="56"  x2="100" y2="62"  stroke="#B8894A" stroke-width="1"/>
+  <line x1="100" y1="138" x2="100" y2="144" stroke="#B8894A" stroke-width="1"/>
+  <line x1="56"  y1="100" x2="62"  y2="100" stroke="#B8894A" stroke-width="1"/>
+  <line x1="138" y1="100" x2="144" y2="100" stroke="#B8894A" stroke-width="1"/>
+  <line x1="68.9" y1="68.9" x2="73.1" y2="73.1" stroke="#B8894A" stroke-width="0.8"/>
+  <line x1="131.1" y1="68.9" x2="126.9" y2="73.1" stroke="#B8894A" stroke-width="0.8"/>
+  <line x1="68.9" y1="131.1" x2="73.1" y2="126.9" stroke="#B8894A" stroke-width="0.8"/>
+  <line x1="131.1" y1="131.1" x2="126.9" y2="126.9" stroke="#B8894A" stroke-width="0.8"/>
+
+  <!-- Mid ring -->
+  <circle cx="100" cy="100" r="31" fill="none" stroke="#7A9E7A" stroke-width="0.8"/>
+
+  <!-- Small diamond accents on mid ring (cardinal points) -->
+  <polygon points="100,65  103,69  100,73  97,69"  fill="none" stroke="#B8894A" stroke-width="0.6"/>
+  <polygon points="100,127 103,131 100,135 97,131" fill="none" stroke="#B8894A" stroke-width="0.6"/>
+  <polygon points="65,100  69,97  73,100  69,103"  fill="none" stroke="#B8894A" stroke-width="0.6"/>
+  <polygon points="127,100 131,97 135,100 131,103" fill="none" stroke="#B8894A" stroke-width="0.6"/>
+
+  <!-- Inner ring -->
+  <circle cx="100" cy="100" r="18" fill="none" stroke="#B8894A" stroke-width="0.8"/>
+
+  <!-- Spokes inner→mid ring (cardinal) -->
+  <line x1="100" y1="82"  x2="100" y2="90"  stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="100" y1="110" x2="100" y2="118" stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="82"  y1="100" x2="90"  y2="100" stroke="#B8894A" stroke-width="0.7"/>
+  <line x1="110" y1="100" x2="118" y2="100" stroke="#B8894A" stroke-width="0.7"/>
+
+  <!-- Diagonal dots at mid ring -->
+  <circle cx="121.9" cy="78.1" r="2.2" fill="#7A9E7A"/>
+  <circle cx="121.9" cy="121.9" r="2.2" fill="#7A9E7A"/>
+  <circle cx="78.1"  cy="121.9" r="2.2" fill="#7A9E7A"/>
+  <circle cx="78.1"  cy="78.1"  r="2.2" fill="#7A9E7A"/>
+
+  <!-- Core -->
+  <circle cx="100" cy="100" r="6"   fill="none" stroke="#7A9E7A" stroke-width="0.8"/>
+  <circle cx="100" cy="100" r="2.5" fill="#B8894A"/>
+
+  <!-- ─── Housing micro-glyphs ──────────────────────────────── -->
+
+  <!-- NW: House  (centered ~50,50) -->
+  <g transform="translate(38,37)">
+    <polyline points="0,11 12,0 24,11"
+              fill="none" stroke="#B8894A" stroke-width="1"
+              stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="2" y="11" width="20" height="14"
+          fill="none" stroke="#B8894A" stroke-width="0.9" rx="0.5"/>
+    <rect x="8" y="18" width="8" height="7"
+          fill="none" stroke="#7A9E7A" stroke-width="0.65"/>
+    <rect x="3" y="13" width="5" height="4"
+          fill="none" stroke="#7A9E7A" stroke-width="0.55"/>
+  </g>
+
+  <!-- NE: Location pin  (centered ~150,50) -->
+  <g transform="translate(139,34)">
+    <path d="M11,0 C5,0 0,5 0,11 C0,18 11,26 11,26 C11,26 22,18 22,11 C22,5 17,0 11,0 Z"
+          fill="none" stroke="#7A9E7A" stroke-width="0.95"
+          stroke-linejoin="round"/>
+    <circle cx="11" cy="11" r="4.5" fill="none" stroke="#7A9E7A" stroke-width="0.65"/>
+  </g>
+
+  <!-- SE: Wrench  (centered ~150,150) -->
+  <g transform="translate(139,140)">
+    <!-- handle -->
+    <line x1="3" y1="19" x2="14" y2="8"
+          stroke="#B8894A" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- socket head -->
+    <circle cx="17" cy="5"  r="5"   fill="none" stroke="#B8894A" stroke-width="0.95"/>
+    <circle cx="17" cy="5"  r="2"   fill="#B8894A"/>
+    <!-- butt end -->
+    <circle cx="1"  cy="21" r="3.5" fill="none" stroke="#B8894A" stroke-width="0.85"/>
+  </g>
+
+  <!-- SW: Water tap / drop  (centered ~50,150) -->
+  <g transform="translate(37,140)">
+    <!-- vertical pipe -->
+    <line x1="10" y1="0" x2="10" y2="8"
+          stroke="#7A9E7A" stroke-width="1" stroke-linecap="round"/>
+    <!-- horizontal spout -->
+    <line x1="10" y1="8" x2="20" y2="8"
+          stroke="#7A9E7A" stroke-width="1" stroke-linecap="round"/>
+    <!-- spout nozzle -->
+    <line x1="20" y1="5" x2="20" y2="13"
+          stroke="#7A9E7A" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- water drop below nozzle -->
+    <path d="M20,15 C20,15 16.5,19 16.5,21.5 a3.5,3.5 0 0,0 7,0 C23.5,19 20,15 20,15 Z"
+          fill="none" stroke="#7A9E7A" stroke-width="0.75" stroke-linejoin="round"/>
+  </g>
+
+</svg>
