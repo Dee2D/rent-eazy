@@ -4,13 +4,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { pathname } = request.nextUrl;
 
-  // If Supabase is not yet configured, block dashboard access
+  const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+
   if (!supabaseUrl || !supabaseKey) {
-    if (request.nextUrl.pathname.startsWith('/dashboard')) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      return NextResponse.redirect(loginUrl);
+    if (isProtected) {
+      return NextResponse.redirect(new URL('/login', request.url));
     }
     return NextResponse.next({ request });
   }
@@ -34,15 +34,13 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    return NextResponse.redirect(loginUrl);
+  if (!user && isProtected) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
 };
