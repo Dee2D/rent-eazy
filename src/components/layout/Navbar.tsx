@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="text-stone-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors text-sm font-medium">Home</Link>
           <Link href="/properties" className="text-stone-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors text-sm font-medium">Properties</Link>
-          <Link href="/#services" className="text-stone-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors text-sm font-medium">Services</Link>
+          <Link href="/services" className="text-stone-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors text-sm font-medium">Services</Link>
         </div>
 
         {/* Auth area + theme toggle */}
@@ -90,7 +90,7 @@ export default function Navbar() {
         <div className="md:hidden bg-white dark:bg-slate-900 border-t border-stone-100 dark:border-slate-800 px-4 py-4 flex flex-col gap-3">
           <Link href="/" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Home</Link>
           <Link href="/properties" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Properties</Link>
-          <Link href="/#services" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Services</Link>
+          <Link href="/services" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Services</Link>
           {user ? (
             <>
               <Link href="/dashboard" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Dashboard</Link>
