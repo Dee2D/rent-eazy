@@ -8,6 +8,7 @@ import {
 } from '@/lib/supabase/admin';
 import StatsCard from '@/components/admin/StatsCard';
 import Charts from '@/components/admin/Charts';
+import SendReportButton from '@/components/admin/SendReportButton';
 import { formatUGX } from '@/lib/utils';
 
 function statusBadge(isActive: boolean, isTaken: boolean, expiresAt: string | null) {
@@ -56,6 +57,9 @@ export default async function AdminPage() {
 
       {/* Charts */}
       <Charts listingsData={listingsChart} revenueData={revenueChart} />
+
+      {/* Email reports */}
+      <SendReportButton />
 
       {/* Recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
