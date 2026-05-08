@@ -54,6 +54,8 @@ export interface ServiceProvider {
   description: string | null;
   latitude: number;
   longitude: number;
+  district: string;
+  area_name: string;
   is_visible: boolean;
   profiles?: Profile;
   service_categories?: ServiceCategory;

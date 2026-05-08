@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, MapPin, Search } from 'lucide-react';
+import { Phone, MapPin, Search, X } from 'lucide-react';
 import type { ServiceProvider, ServiceCategory } from '@/types';
+
+const DISTRICTS = [
+  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
+  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
+];
 
 const CATEGORY_ICONS: Record<string, string> = {
   Plumbing:           '🔧',
@@ -84,6 +89,8 @@ interface ServicesClientProps {
 export default function ServicesClient({ providers, categories }: ServicesClientProps) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [district, setDistrict] = useState('');
+  const [areaName, setAreaName] = useState('');
 
   const filtered = providers.filter((p) => {
     const matchesCategory =
@@ -93,8 +100,18 @@ export default function ServicesClient({ providers, categories }: ServicesClient
       (p.profiles?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
       (p.description ?? '').toLowerCase().includes(search.toLowerCase()) ||
       (p.service_categories?.name ?? '').toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesDistrict = !district || p.district === district;
+    const matchesArea =
+      !areaName || (p.area_name ?? '').toLowerCase().includes(areaName.toLowerCase());
+    return matchesCategory && matchesSearch && matchesDistrict && matchesArea;
   });
+
+  const hasLocationFilter = district || areaName;
+
+  function clearLocation() {
+    setDistrict('');
+    setAreaName('');
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
@@ -148,6 +165,47 @@ export default function ServicesClient({ providers, categories }: ServicesClient
             })}
           </div>
         </div>
+
+        {/* Location filter */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-stone-100 dark:border-slate-700 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-stone-400 dark:text-slate-500 uppercase tracking-wide">Location</p>
+            {hasLocationFilter && (
+              <button onClick={clearLocation} className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600">
+                <X size={11} /> Clear
+              </button>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-stone-600 dark:text-slate-400 mb-1">District</label>
+            <select
+              value={district}
+              onChange={(e) => { setDistrict(e.target.value); setAreaName(''); }}
+              className="w-full px-3 py-2 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="">All districts</option>
+              {DISTRICTS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-stone-600 dark:text-slate-400 mb-1">Area / Neighbourhood</label>
+            <div className="relative">
+              <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500" />
+              <input
+                type="text"
+                value={areaName}
+                onChange={(e) => setAreaName(e.target.value)}
+                disabled={!district}
+                placeholder={district ? 'e.g. Ntinda, Najjera' : 'Select district first'}
+                className="w-full pl-8 pr-3 py-2 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+        </div>
       </aside>
 
       {/* Provider grid */}
@@ -156,13 +214,15 @@ export default function ServicesClient({ providers, categories }: ServicesClient
           <div className="flex flex-col items-center justify-center py-20 text-stone-400 dark:text-slate-500">
             <span className="text-6xl mb-4">🔍</span>
             <p className="text-lg font-medium">No providers found</p>
-            <p className="text-sm mt-1">Try adjusting your search or category</p>
+            <p className="text-sm mt-1">Try adjusting your search, category, or location</p>
           </div>
         ) : (
           <>
             <p className="text-sm text-stone-400 dark:text-slate-500 mb-4">
               {filtered.length} provider{filtered.length !== 1 ? 's' : ''}
               {activeCategory !== 'all' ? ` in ${activeCategory}` : ''}
+              {district ? ` · ${district}` : ''}
+              {areaName ? `, ${areaName}` : ''}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((p) => (

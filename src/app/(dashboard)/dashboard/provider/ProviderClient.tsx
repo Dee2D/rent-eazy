@@ -21,9 +21,16 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
 
   const [now] = useState(Date.now);
 
+  const DISTRICTS = [
+    'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
+    'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
+  ];
+
   const [form, setForm] = useState({
     category_id: categories[0]?.id ?? '',
     description: '',
+    district: '',
+    area_name: '',
     latitude: 0.3476,
     longitude: 32.5899,
   });
@@ -73,6 +80,30 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows={3} className="w-full px-4 py-3 border border-stone-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm resize-none bg-white dark:bg-slate-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500"
             placeholder="Describe your services and experience…" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-stone-700 dark:text-slate-200 mb-1">District</label>
+          <select
+            value={form.district}
+            onChange={(e) => setForm({ ...form, district: e.target.value, area_name: '' })}
+            className="w-full px-4 py-3 border border-stone-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-white"
+          >
+            <option value="">Select district…</option>
+            {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-stone-700 dark:text-slate-200 mb-1">Area / Neighbourhood</label>
+          <input
+            type="text"
+            value={form.area_name}
+            onChange={(e) => setForm({ ...form, area_name: e.target.value })}
+            disabled={!form.district}
+            placeholder={form.district ? 'e.g. Ntinda, Kiwatule, Najjera' : 'Select a district first'}
+            className="w-full px-4 py-3 border border-stone-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-white placeholder:text-stone-400 disabled:opacity-60 disabled:cursor-not-allowed"
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
