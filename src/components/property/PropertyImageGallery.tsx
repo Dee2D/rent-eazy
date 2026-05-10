@@ -15,7 +15,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
   if (images.length === 0) {
     return (
-      <div className="h-72 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-200 text-7xl">
+      <div className="h-72 bg-orange-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-orange-200 dark:text-slate-600 text-7xl">
         🏠
       </div>
     );
@@ -23,7 +23,7 @@ export default function PropertyImageGallery({ images, title }: PropertyImageGal
 
   return (
     <div className="space-y-2">
-      <div className="relative h-72 md:h-96 rounded-2xl overflow-hidden bg-stone-100">
+      <div className="relative h-72 md:h-96 rounded-2xl overflow-hidden bg-stone-100 dark:bg-slate-700">
         <Image
           src={images[active].image_url}
           alt={`${title} — image ${active + 1}`}

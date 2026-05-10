@@ -82,7 +82,7 @@ export async function getRecentListings(limit = 6): Promise<AdminProperty[]> {
   const supabase = await createServiceRoleClient();
   const { data } = await supabase
     .from('properties')
-    .select('id, title, district, area_name, price_ugx, property_type, is_active, expires_at, created_at, profiles(id, full_name)')
+    .select('id, title, district, area_name, price_ugx, property_type, is_active, is_taken, expires_at, created_at, profiles(id, full_name)')
     .order('created_at', { ascending: false })
     .limit(limit);
   return ((data as unknown as AdminProperty[]) ?? []).map((p) => ({ ...p, is_taken: p.is_taken ?? false }));
@@ -149,7 +149,7 @@ export async function getAllProperties(): Promise<AdminProperty[]> {
   const supabase = await createServiceRoleClient();
   const { data } = await supabase
     .from('properties')
-    .select('id, title, district, area_name, price_ugx, property_type, is_active, expires_at, created_at, profiles(id, full_name)')
+    .select('id, title, district, area_name, price_ugx, property_type, is_active, is_taken, expires_at, created_at, profiles(id, full_name)')
     .order('created_at', { ascending: false });
   return ((data as unknown as AdminProperty[]) ?? []).map((p) => ({ ...p, is_taken: p.is_taken ?? false }));
 }

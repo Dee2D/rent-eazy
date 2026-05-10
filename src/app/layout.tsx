@@ -19,9 +19,27 @@ const nunito = Nunito({
   display: "swap",
 });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://renteazy.com';
+
 export const metadata: Metadata = {
-  title: "Rent Eazy – Find Homes & Services Easily",
+  title: {
+    default: "Rent Eazy – Find Homes & Services Easily",
+    template: "%s | Rent Eazy",
+  },
   description: "Rent Eazy helps you find rental homes and trusted service providers across Uganda.",
+  metadataBase: new URL(appUrl),
+  openGraph: {
+    title: "Rent Eazy – Find Homes & Services Easily",
+    description: "Rent Eazy helps you find rental homes and trusted service providers across Uganda.",
+    type: "website",
+    locale: "en_UG",
+    siteName: "Rent Eazy",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rent Eazy – Find Homes & Services Easily",
+    description: "Rent Eazy helps you find rental homes and trusted service providers across Uganda.",
+  },
 };
 
 // Runs before React hydrates — prevents dark mode flash

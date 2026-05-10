@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 
 const MIN_IMAGES = 6;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -15,6 +15,9 @@ export default function ImageUploader({ files, onChange, error }: ImageUploaderP
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [sizeError, setSizeError] = useState<string | null>(null);
+
+  const previewUrls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
+  useEffect(() => () => { previewUrls.forEach(URL.revokeObjectURL); }, [previewUrls]);
 
   function addFiles(incoming: FileList | null) {
     if (!incoming) return;
@@ -94,33 +97,29 @@ export default function ImageUploader({ files, onChange, error }: ImageUploaderP
       {/* Thumbnail grid */}
       {files.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {files.map((file, i) => {
-            const url = URL.createObjectURL(file);
-            return (
-              <div key={i} className="relative aspect-square group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Preview ${i + 1}`}
-                  className="w-full h-full object-cover rounded-xl"
-                  onLoad={() => URL.revokeObjectURL(url)}
-                />
+          {previewUrls.map((url, i) => (
+            <div key={i} className="relative aspect-square group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`Preview ${i + 1}`}
+                className="w-full h-full object-cover rounded-xl"
+              />
                 {i === 0 && (
                   <span className="absolute top-1 left-1 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                     Cover
                   </span>
                 )}
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remove image"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })}
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
+                className="absolute top-1 right-1 w-5 h-5 bg-black/60 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Remove image"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

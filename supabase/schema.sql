@@ -22,6 +22,7 @@ CREATE TABLE properties (
   price_ugx INTEGER NOT NULL,
   payment_period TEXT NOT NULL DEFAULT 'monthly' CHECK (payment_period IN ('monthly','6_months','yearly')),
   property_type TEXT NOT NULL CHECK (property_type IN ('apartment','house','bedsitter')),
+  listing_type TEXT NOT NULL DEFAULT 'landlord' CHECK (listing_type IN ('landlord','broker','agent')),
   bedrooms INTEGER NOT NULL DEFAULT 1,
   bathrooms INTEGER NOT NULL DEFAULT 1,
   district TEXT NOT NULL,
@@ -29,6 +30,7 @@ CREATE TABLE properties (
   latitude DOUBLE PRECISION NOT NULL,
   longitude DOUBLE PRECISION NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT false,
+  is_taken BOOLEAN NOT NULL DEFAULT false,
   expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -54,6 +56,8 @@ CREATE TABLE service_providers (
   profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   category_id UUID REFERENCES service_categories(id) NOT NULL,
   description TEXT,
+  district TEXT NOT NULL DEFAULT '',
+  area_name TEXT NOT NULL DEFAULT '',
   latitude DOUBLE PRECISION NOT NULL,
   longitude DOUBLE PRECISION NOT NULL,
   is_visible BOOLEAN NOT NULL DEFAULT false

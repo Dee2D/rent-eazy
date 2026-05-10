@@ -1,4 +1,3 @@
-import { Phone, MapPin } from 'lucide-react';
 import { getVisibleProviders, getServiceCategories } from '@/lib/supabase/providers';
 import type { ServiceProvider, ServiceCategory } from '@/types';
 import ServicesClient from './ServicesClient';

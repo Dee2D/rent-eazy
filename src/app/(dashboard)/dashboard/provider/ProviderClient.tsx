@@ -5,6 +5,11 @@ import PaymentModal from '@/components/payment/PaymentModal';
 import { createClient } from '@/lib/supabase/client';
 import type { ServiceProvider, ServiceCategory, Subscription } from '@/types';
 
+const DISTRICTS = [
+  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
+  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
+];
+
 interface Props {
   userId: string;
   phoneNumber: string;
@@ -20,11 +25,6 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
   const [error, setError] = useState<string | null>(null);
 
   const [now] = useState(Date.now);
-
-  const DISTRICTS = [
-    'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-    'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-  ];
 
   const [form, setForm] = useState({
     category_id: categories[0]?.id ?? '',
@@ -133,19 +133,6 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
         >
           {loading ? 'Creating…' : 'Create Profile & Subscribe'}
         </button>
-
-        {provider && (
-          <PaymentModal
-            isOpen={showPayment}
-            onClose={() => setShowPayment(false)}
-            onSuccess={() => window.location.reload()}
-            amount={30000}
-            type="subscription"
-            referenceId={(provider as ServiceProvider).id}
-            userId={userId}
-            phoneNumber={phoneNumber}
-          />
-        )}
       </div>
     );
   }

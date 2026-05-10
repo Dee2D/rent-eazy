@@ -1,9 +1,20 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import PropertyCard from '@/components/property/PropertyCard';
 import PropertyFilters from '@/components/property/PropertyFilters';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { getFilteredProperties } from '@/lib/supabase/properties';
 import type { PropertyFilters as Filters, PropertyType } from '@/types';
+
+export const metadata: Metadata = {
+  title: 'Browse Properties — Rent Eazy',
+  description: 'Find rental apartments, houses, and bedsitters across Uganda. Filter by district, price, and bedrooms on Rent Eazy.',
+  openGraph: {
+    title: 'Browse Properties — Rent Eazy',
+    description: 'Find rental apartments, houses, and bedsitters across Uganda.',
+    type: 'website',
+  },
+};
 
 interface SearchParams {
   district?: string;

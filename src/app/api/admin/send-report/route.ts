@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/supabase/verify-admin';
 import { sendReportEmail, buildReportData, buildReportHtml, type ReportPeriod } from '@/lib/email/report';
-
-async function verifyAdmin() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  return profile?.role === 'admin' ? user : null;
-}
 
 export async function POST(request: NextRequest) {
   const admin = await verifyAdmin();
