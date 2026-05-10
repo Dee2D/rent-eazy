@@ -65,7 +65,7 @@ export async function buildReportData(period: ReportPeriod): Promise<ReportData>
 export function buildReportHtml(data: ReportData): string {
   const title = data.period === 'daily' ? 'Daily Report' : 'Weekly Report';
   const periodLabel = data.period === 'daily' ? 'Today' : 'This Week';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://renteazy.com';
 
   const listingsRows = data.recentListings.map((l) => `
     <tr>
