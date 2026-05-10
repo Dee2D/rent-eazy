@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, MapPin, Search, X } from 'lucide-react';
+import Link from 'next/link';
+import { Phone, MapPin, Search, X, User } from 'lucide-react';
 import type { ServiceProvider, ServiceCategory } from '@/types';
 import { DISTRICTS } from '@/lib/constants';
 
@@ -50,28 +51,37 @@ function ProviderCard({ provider }: { provider: ServiceProvider }) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-auto pt-2 border-t border-stone-100 dark:border-slate-700">
-        {phone ? (
+      <div className="mt-auto pt-3 border-t border-stone-100 dark:border-slate-700 space-y-2">
+        {phone && (
           <span className="flex items-center gap-1.5 text-xs text-stone-400 dark:text-slate-500">
             <Phone size={12} />
             {phone}
           </span>
-        ) : (
-          <span />
         )}
-        {whatsapp ? (
-          <a
-            href={whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-          >
-            <Phone size={14} />
-            WhatsApp
-          </a>
-        ) : (
-          <span className="text-xs text-stone-300 dark:text-slate-600">No contact info</span>
-        )}
+        <div className="flex gap-2">
+          {provider.slug && (
+            <Link
+              href={`/providers/${provider.slug}`}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 dark:hover:bg-slate-600 text-stone-700 dark:text-slate-200 text-sm font-medium px-3 py-2 rounded-xl transition-colors"
+            >
+              <User size={13} />
+              Profile
+            </Link>
+          )}
+          {whatsapp ? (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
+            >
+              <Phone size={14} />
+              WhatsApp
+            </a>
+          ) : (
+            <span className="text-xs text-stone-300 dark:text-slate-600 self-center">No contact</span>
+          )}
+        </div>
       </div>
     </div>
   );

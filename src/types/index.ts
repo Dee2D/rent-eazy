@@ -57,6 +57,7 @@ export interface ServiceProvider {
   district: string;
   area_name: string;
   is_visible: boolean;
+  slug: string | null;
   profiles?: Profile;
   service_categories?: ServiceCategory;
 }

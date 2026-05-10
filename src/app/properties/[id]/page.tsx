@@ -1,11 +1,24 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Bed, Bath, MapPin, Home } from 'lucide-react';
+import Link from 'next/link';
+import { Bed, Bath, MapPin, Home, Phone } from 'lucide-react';
 import { getPropertyById } from '@/lib/supabase/properties';
+import { getProvidersNearProperty } from '@/lib/supabase/providers';
 import { formatUGX, formatPeriod } from '@/lib/utils';
 import type { MapMarker } from '@/types';
 import MapViewClient from '@/components/map/MapViewClient';
 import PropertyImageGallery from '@/components/property/PropertyImageGallery';
+
+const CATEGORY_ICONS: Record<string, string> = {
+  Plumbing:           '🔧',
+  Electrical:         '⚡',
+  Cleaning:           '🧹',
+  Security:           '🔒',
+  Painting:           '🎨',
+  Carpentry:          '🪵',
+  'Moving & Delivery':'🚚',
+  Gardening:          '🌿',
+};
 
 export async function generateMetadata({
   params,
@@ -51,6 +64,13 @@ export default async function PropertyDetailPage({
   }
 
   if (!property) notFound();
+
+  let nearbyProviders: Awaited<ReturnType<typeof getProvidersNearProperty>> = [];
+  try {
+    nearbyProviders = await getProvidersNearProperty(property.district, property.area_name, 4);
+  } catch {
+    nearbyProviders = [];
+  }
 
   const whatsappUrl = property.profiles?.phone_number
     ? `https://wa.me/${property.profiles.phone_number.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I saw your listing on Rent Eazy')}`
@@ -121,6 +141,62 @@ export default async function PropertyDetailPage({
           <MapViewClient markers={[marker]} height="300px" interactive={false} />
         </div>
       </div>
+
+      {nearbyProviders.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-stone-900 dark:text-white">
+              Service Providers Near {property.area_name}
+            </h2>
+            <Link href="/services" className="text-sm text-orange-500 hover:underline">
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {nearbyProviders.map((p) => {
+              const pName  = p.profiles?.full_name ?? 'Provider';
+              const pPhone = p.profiles?.phone_number;
+              const cat    = p.service_categories?.name ?? 'Services';
+              const whatsapp = pPhone
+                ? `https://wa.me/${pPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${pName}, I found you on Rent Eazy.`)}`
+                : null;
+
+              return (
+                <div key={p.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-stone-100 dark:border-slate-700 shadow-sm p-4 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-2xl shrink-0">
+                    {CATEGORY_ICONS[cat] ?? '🔧'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-stone-900 dark:text-white text-sm leading-tight truncate">{pName}</p>
+                    <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">{cat} · {p.area_name}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    {p.slug && (
+                      <Link
+                        href={`/providers/${p.slug}`}
+                        className="text-xs bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 dark:hover:bg-slate-600 text-stone-700 dark:text-slate-200 font-medium px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        Profile
+                      </Link>
+                    )}
+                    {whatsapp && (
+                      <a
+                        href={whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <Phone size={11} />
+                        WA
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
