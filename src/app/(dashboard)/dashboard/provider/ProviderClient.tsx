@@ -4,11 +4,8 @@ import { useState, useMemo } from 'react';
 import PaymentModal from '@/components/payment/PaymentModal';
 import { createClient } from '@/lib/supabase/client';
 import type { ServiceProvider, ServiceCategory, Subscription } from '@/types';
+import { DISTRICTS, SUBSCRIPTION_FEE } from '@/lib/constants';
 
-const DISTRICTS = [
-  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-];
 
 interface Props {
   userId: string;
@@ -123,7 +120,7 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
 
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-sm">
           <p className="font-semibold text-stone-900 dark:text-white mb-1">Subscription Fee</p>
-          <p className="text-stone-600 dark:text-slate-400">Pay UGX 30,000 to appear on the map for 30 days.</p>
+          <p className="text-stone-600 dark:text-slate-400">Pay UGX {SUBSCRIPTION_FEE.toLocaleString('en-UG')} to appear on the map for 30 days.</p>
         </div>
 
         <button
@@ -166,7 +163,7 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
               onClick={() => setShowPayment(true)}
               className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
             >
-              Subscribe — UGX 30,000
+              Subscribe — UGX {SUBSCRIPTION_FEE.toLocaleString('en-UG')}
             </button>
           </>
         )}
@@ -184,7 +181,7 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
         isOpen={showPayment}
         onClose={() => setShowPayment(false)}
         onSuccess={() => window.location.reload()}
-        amount={30000}
+        amount={SUBSCRIPTION_FEE}
         type="subscription"
         referenceId={provider.id}
         userId={userId}

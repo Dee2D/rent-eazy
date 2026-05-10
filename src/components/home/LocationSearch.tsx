@@ -1,11 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { DISTRICTS } from '@/lib/constants';
 
-const DISTRICTS = [
-  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-];
 const DEBOUNCE_MS = 400;
 
 interface LocationSearchProps {

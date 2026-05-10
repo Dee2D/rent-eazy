@@ -8,14 +8,7 @@ import MapPickerClient from '@/components/map/MapPickerClient';
 import ImageUploader from '@/components/property/ImageUploader';
 import { createClient } from '@/lib/supabase/client';
 import type { PropertyType, PaymentPeriod, ListingType } from '@/types';
-
-const DISTRICTS = [
-  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-];
-
-const LISTING_FEE = 10_000;
-const MIN_IMAGES = 6;
+import { DISTRICTS, LISTING_FEE, MIN_IMAGES } from '@/lib/constants';
 
 const STEPS = ['Basic Info', 'Location', 'Photos', 'Pricing'];
 

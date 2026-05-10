@@ -24,7 +24,7 @@ export function useTheme() {
   const toggleTheme = useCallback(() => {
     const next: Theme = theme === 'light' ? 'dark' : 'light';
     document.documentElement.classList.toggle('dark', next === 'dark');
-    localStorage.setItem('theme', next);
+    try { localStorage.setItem('theme', next); } catch { /* private mode or storage quota exceeded */ }
   }, [theme]);
 
   return { theme, toggleTheme, mounted: true };

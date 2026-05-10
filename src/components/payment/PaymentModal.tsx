@@ -130,7 +130,7 @@ export default function PaymentModal({
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl p-3 text-sm">
               {error}
-              <button onClick={() => setError(null)} className="ml-2 underline">Retry</button>
+              <button onClick={handlePay} className="ml-2 underline">Retry</button>
             </div>
           )}
 

@@ -3,11 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import type { PropertyFilters as Filters, PropertyType } from '@/types';
-
-const DISTRICTS = [
-  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-];
+import { DISTRICTS } from '@/lib/constants';
 
 const inputCls = 'w-full px-3 py-2 border border-stone-200 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors';
 const labelCls = 'block text-xs font-medium text-stone-600 dark:text-slate-400 mb-1';

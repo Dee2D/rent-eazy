@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useState, useMemo, useEffect } from 'react';
+import { MIN_IMAGES } from '@/lib/constants';
 
-const MIN_IMAGES = 6;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 interface ImageUploaderProps {

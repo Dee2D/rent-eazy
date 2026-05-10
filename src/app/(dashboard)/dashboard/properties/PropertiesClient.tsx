@@ -6,8 +6,7 @@ import PaymentModal from '@/components/payment/PaymentModal';
 import ListingCard from '@/components/property/ListingCard';
 import { createClient } from '@/lib/supabase/client';
 import type { Property } from '@/types';
-
-const LISTING_FEE = 10_000;
+import { LISTING_FEE } from '@/lib/constants';
 
 export default function PropertiesClient({ properties: initial, userId }: { properties: Property[]; userId: string }) {
   const [properties, setProperties] = useState<Property[]>(initial);

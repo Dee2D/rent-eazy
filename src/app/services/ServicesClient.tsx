@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import { Phone, MapPin, Search, X } from 'lucide-react';
 import type { ServiceProvider, ServiceCategory } from '@/types';
-
-const DISTRICTS = [
-  'Kampala', 'Wakiso', 'Mukono', 'Entebbe', 'Jinja',
-  'Mbarara', 'Gulu', 'Lira', 'Masaka', 'Fort Portal',
-];
+import { DISTRICTS } from '@/lib/constants';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Plumbing:           '🔧',

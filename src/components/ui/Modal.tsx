@@ -25,7 +25,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg w-full max-w-md z-10">
         <div className="flex items-center justify-between p-6 border-b border-stone-100 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-stone-900 dark:text-white">{title}</h2>
-          <button onClick={onClose} className="text-stone-400 dark:text-slate-400 hover:text-stone-600 dark:hover:text-slate-200 transition-colors">
+          <button onClick={onClose} aria-label="Close" className="text-stone-400 dark:text-slate-400 hover:text-stone-600 dark:hover:text-slate-200 transition-colors">
             <X size={20} />
           </button>
         </div>
