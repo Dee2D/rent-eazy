@@ -39,7 +39,7 @@ function buildPopupHtml(marker: MapMarker): string {
       </div>
       <div style="padding:0 14px 12px">
         <a href="${escapeHtml(safeHref)}"
-           style="display:block;background:${typeColor};color:white;text-align:center;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;letter-spacing:0.01em;-webkit-tap-highlight-color:transparent">
+           style="display:block;background:${typeColor};color:white;text-align:center;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;-webkit-tap-highlight-color:transparent">
           View Details →
         </a>
       </div>
@@ -49,18 +49,22 @@ function buildPopupHtml(marker: MapMarker): string {
 
 export default function MapView({
   markers,
-  height = '100vh',
+  height = '100%',
   interactive = true,
   theme = 'light',
   flyTo = null,
 }: MapViewProps) {
+  const wrapperRef    = useRef<HTMLDivElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapRef        = useRef<mapboxgl.Map | null>(null);
 
   useEffect(() => {
+    let ro: ResizeObserver | null = null;
+
     async function initMap() {
       const mapboxgl = (await import('mapbox-gl')).default;
-      (mapboxgl as unknown as { accessToken: string }).accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+      (mapboxgl as unknown as { accessToken: string }).accessToken =
+        process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
       if (!mapContainerRef.current || mapRef.current) return;
 
@@ -76,17 +80,14 @@ export default function MapView({
 
       mapRef.current = map;
 
-      // Compact attribution (required by Mapbox ToS)
+      // Compact attribution (Mapbox ToS requirement)
       map.addControl(new mapboxgl.AttributionControl({ compact: true }));
 
       if (interactive) {
-        // Zoom buttons — bottom right, away from search overlay
         map.addControl(
           new mapboxgl.NavigationControl({ showCompass: false }),
           'bottom-right'
         );
-
-        // Geolocate "Near Me" — bottom right, above zoom buttons
         map.addControl(
           new mapboxgl.GeolocateControl({
             positionOptions: { enableHighAccuracy: true },
@@ -98,6 +99,9 @@ export default function MapView({
       }
 
       map.on('load', () => {
+        // Force correct dimensions after CSS has settled
+        map.resize();
+
         markers.forEach((marker) => {
           const el =
             marker.type === 'property'
@@ -117,11 +121,21 @@ export default function MapView({
             .addTo(map);
         });
       });
+
+      // ResizeObserver — calls resize() whenever the wrapper grows/shrinks,
+      // e.g. when a flex parent finishes painting or a tab becomes visible.
+      if (wrapperRef.current) {
+        ro = new ResizeObserver(() => {
+          mapRef.current?.resize();
+        });
+        ro.observe(wrapperRef.current);
+      }
     }
 
     initMap();
 
     return () => {
+      ro?.disconnect();
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -134,12 +148,18 @@ export default function MapView({
     }
   }, [theme]);
 
-  // Fly to location on demand (e.g. "Near Me" from parent)
+  // flyTo on demand
   useEffect(() => {
     if (mapRef.current && flyTo) {
       mapRef.current.flyTo({ center: flyTo, zoom: 14, duration: 1200 });
     }
   }, [flyTo]);
 
-  return <div ref={mapContainerRef} style={{ height, width: '100%' }} />;
+  // Wrapper fills the positioned parent via absolute inset — reliable across
+  // flex-computed heights where height:100% can resolve to 0.
+  return (
+    <div ref={wrapperRef} style={{ position: 'absolute', inset: 0 }}>
+      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
+    </div>
+  );
 }

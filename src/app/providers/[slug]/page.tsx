@@ -251,8 +251,8 @@ export default async function ProviderProfilePage({
               <h2 className="font-semibold text-stone-900 dark:text-white text-lg mb-4">
                 {category} Location — {areaName}
               </h2>
-              <div className="rounded-xl overflow-hidden">
-                <MapViewClient markers={[marker]} height="280px" interactive={false} />
+              <div className="relative h-56 md:h-64 rounded-xl overflow-hidden">
+                <MapViewClient markers={[marker]} interactive={false} />
               </div>
             </section>
           </div>

@@ -160,8 +160,8 @@ export default async function PropertyDetailPage({
 
       <div className="mt-8">
         <h2 className="font-semibold text-stone-900 dark:text-white mb-3">Location</h2>
-        <div className="rounded-2xl overflow-hidden">
-          <MapViewClient markers={[marker]} height="300px" interactive={false} />
+        <div className="relative h-56 md:h-72 rounded-2xl overflow-hidden">
+          <MapViewClient markers={[marker]} interactive={false} />
         </div>
       </div>
 

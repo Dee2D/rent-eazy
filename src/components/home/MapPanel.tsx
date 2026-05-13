@@ -114,8 +114,8 @@ export default function MapPanel({ initialProperties, providerMarkers }: MapPane
       </div>
 
       {/* ── Map: fills remaining space (~80% on mobile, 100% on desktop) ── */}
-      <div className="flex-1 relative min-h-0">
-        <MapViewClient markers={allMarkers} height="100%" interactive theme={theme} flyTo={flyTo} />
+      <div className="flex-1 relative min-h-0 overflow-hidden">
+        <MapViewClient markers={allMarkers} interactive theme={theme} flyTo={flyTo} />
 
         {/* ── Desktop-only overlays ── */}
 
