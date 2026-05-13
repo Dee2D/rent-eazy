@@ -5,7 +5,7 @@ import PaymentModal from '@/components/payment/PaymentModal';
 import { createClient } from '@/lib/supabase/client';
 import type { ServiceProvider, ServiceCategory, Subscription } from '@/types';
 import { DISTRICTS, SUBSCRIPTION_FEE } from '@/lib/constants';
-
+import { checkTrialStatus } from '@/lib/supabase/trial';
 
 interface Props {
   userId: string;
@@ -13,15 +13,17 @@ interface Props {
   existingProvider: ServiceProvider | null;
   categories: ServiceCategory[];
   subscription: Subscription | null;
+  trialEndDate: string | null;
 }
 
-export default function ProviderClient({ userId, phoneNumber, existingProvider, categories, subscription }: Props) {
+export default function ProviderClient({ userId, phoneNumber, existingProvider, categories, subscription, trialEndDate }: Props) {
   const [provider, setProvider] = useState<ServiceProvider | null>(existingProvider);
   const [showPayment, setShowPayment] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [now] = useState(Date.now);
+  const trial = checkTrialStatus(trialEndDate);
 
   const [form, setForm] = useState({
     category_id: categories[0]?.id ?? '',
@@ -48,8 +50,20 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
         .select('*, service_categories(name)')
         .single();
       if (dbErr) throw new Error(dbErr.message);
-      setProvider(data as ServiceProvider);
-      setShowPayment(true);
+      const newProvider = data as ServiceProvider;
+      setProvider(newProvider);
+
+      if (trial.isOnTrial) {
+        const res = await fetch('/api/trial-activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, type: 'subscription', referenceId: newProvider.id }),
+        });
+        if (!res.ok) throw new Error('Trial activation failed');
+        window.location.reload();
+      } else {
+        setShowPayment(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create profile');
     } finally {
@@ -118,17 +132,24 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
           </div>
         </div>
 
-        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-sm">
-          <p className="font-semibold text-stone-900 dark:text-white mb-1">Subscription Fee</p>
-          <p className="text-stone-600 dark:text-slate-400">Pay UGX {SUBSCRIPTION_FEE.toLocaleString('en-UG')} to appear on the map for 30 days.</p>
-        </div>
+        {trial.isOnTrial ? (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 text-sm">
+            <p className="font-semibold text-green-800 dark:text-green-300 mb-1">Free Trial Active</p>
+            <p className="text-green-700 dark:text-green-400">Your profile will appear on the map for free until your trial ends.</p>
+          </div>
+        ) : (
+          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-sm">
+            <p className="font-semibold text-stone-900 dark:text-white mb-1">Subscription Fee</p>
+            <p className="text-stone-600 dark:text-slate-400">Pay UGX {SUBSCRIPTION_FEE.toLocaleString('en-UG')} to appear on the map for 30 days.</p>
+          </div>
+        )}
 
         <button
           onClick={createProvider}
           disabled={loading}
           className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
         >
-          {loading ? 'Creating…' : 'Create Profile & Subscribe'}
+          {loading ? 'Creating…' : trial.isOnTrial ? 'Create Profile (Free Trial)' : 'Create Profile & Subscribe'}
         </button>
       </div>
     );

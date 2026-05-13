@@ -35,12 +35,19 @@ export async function GET(request: NextRequest) {
       const meta = user?.user_metadata;
 
       if (user && meta?.full_name) {
+        const trialStart = new Date();
+        const trialEnd = new Date(trialStart);
+        trialEnd.setMonth(trialEnd.getMonth() + 3);
+
         await supabase.from('profiles').upsert(
           {
             id: user.id,
             full_name: meta.full_name,
             phone_number: meta.phone_number ?? null,
             role: meta.role ?? 'tenant',
+            trial_start_date: trialStart.toISOString(),
+            trial_end_date: trialEnd.toISOString(),
+            is_trial_active: true,
           },
           { onConflict: 'id', ignoreDuplicates: true }
         );

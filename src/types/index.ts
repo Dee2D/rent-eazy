@@ -11,6 +11,9 @@ export interface Profile {
   phone_number: string | null;
   role: UserRole;
   created_at: string;
+  trial_start_date: string | null;
+  trial_end_date: string | null;
+  is_trial_active: boolean;
 }
 
 export interface Property {

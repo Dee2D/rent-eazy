@@ -9,6 +9,7 @@ import ImageUploader from '@/components/property/ImageUploader';
 import { createClient } from '@/lib/supabase/client';
 import type { PropertyType, PaymentPeriod, ListingType } from '@/types';
 import { DISTRICTS, LISTING_FEE, MIN_IMAGES } from '@/lib/constants';
+import { checkTrialStatus } from '@/lib/supabase/trial';
 
 const STEPS = ['Basic Info', 'Location', 'Photos', 'Pricing'];
 
@@ -130,6 +131,8 @@ function AddPropertyForm() {
     return urls;
   }
 
+  const trial = checkTrialStatus(profile?.trial_end_date);
+
   async function submitProperty() {
     if (!user) return;
     if (form.price_ugx <= 0) { setError('Price must be greater than 0'); return; }
@@ -185,8 +188,18 @@ function AddPropertyForm() {
           await supabase.from('property_images').insert(imageRows);
         }
 
-        setCreatedPropertyId(property.id);
-        setShowPayment(true);
+        if (trial.isOnTrial) {
+          const res = await fetch('/api/trial-activate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id, type: 'listing', referenceId: property.id }),
+          });
+          if (!res.ok) throw new Error('Trial activation failed');
+          router.push('/dashboard/properties');
+        } else {
+          setCreatedPropertyId(property.id);
+          setShowPayment(true);
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save property');
@@ -438,18 +451,33 @@ function AddPropertyForm() {
           </div>
 
           {!isEditing && (
-            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-4">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">💳</span>
-                <div>
-                  <p className="font-semibold text-stone-900 dark:text-white text-sm">Listing Fee: UGX 10,000</p>
-                  <p className="text-stone-500 dark:text-slate-400 text-xs mt-0.5">
-                    Your listing will be active for <strong>3 months</strong> after payment.
-                    Reach thousands of tenants across Uganda.
-                  </p>
+            trial.isOnTrial ? (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🎉</span>
+                  <div>
+                    <p className="font-semibold text-green-800 dark:text-green-300 text-sm">Free Trial — No Payment Required</p>
+                    <p className="text-green-700 dark:text-green-400 text-xs mt-0.5">
+                      Your listing will be active until your trial ends on{' '}
+                      <strong>{trial.endDate?.toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">💳</span>
+                  <div>
+                    <p className="font-semibold text-stone-900 dark:text-white text-sm">Listing Fee: UGX 10,000</p>
+                    <p className="text-stone-500 dark:text-slate-400 text-xs mt-0.5">
+                      Your listing will be active for <strong>3 months</strong> after payment.
+                      Reach thousands of tenants across Uganda.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
           )}
 
           {/* Summary */}
@@ -481,8 +509,12 @@ function AddPropertyForm() {
               className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
             >
               {loading
-                ? (isEditing ? 'Saving…' : 'Saving…')
-                : (isEditing ? 'Save Changes' : 'Pay UGX 10,000 & List →')}
+                ? 'Saving…'
+                : isEditing
+                  ? 'Save Changes'
+                  : trial.isOnTrial
+                    ? 'List for Free →'
+                    : 'Pay UGX 10,000 & List →'}
             </button>
           </div>
         </div>

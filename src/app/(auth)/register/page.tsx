@@ -78,11 +78,18 @@ export default function RegisterPage() {
     }
 
     // Email confirmation disabled — create profile and enter the app.
+    const trialStart = new Date();
+    const trialEnd = new Date(trialStart);
+    trialEnd.setMonth(trialEnd.getMonth() + 3);
+
     const { error: profileError } = await supabase.from('profiles').insert({
       id: data.user.id,
       full_name: fullName,
       phone_number: phone || null,
       role,
+      trial_start_date: trialStart.toISOString(),
+      trial_end_date: trialEnd.toISOString(),
+      is_trial_active: true,
     });
 
     if (profileError) {

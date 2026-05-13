@@ -171,3 +171,53 @@ export async function getAllPayments(): Promise<AdminPayment[]> {
     .order('created_at', { ascending: false });
   return (data as unknown as AdminPayment[]) ?? [];
 }
+
+export interface TrialStats {
+  usersOnTrial: number;
+  trialExpired: number;
+  trialConversions: number;
+}
+
+export async function getTrialStats(): Promise<TrialStats> {
+  const supabase = await createServiceRoleClient();
+  const now = new Date().toISOString();
+
+  const [
+    { count: usersOnTrial },
+    { count: trialExpired },
+    { data: expiredUsers },
+  ] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .not('trial_end_date', 'is', null)
+      .gt('trial_end_date', now),
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .not('trial_end_date', 'is', null)
+      .lte('trial_end_date', now),
+    supabase
+      .from('profiles')
+      .select('id')
+      .not('trial_end_date', 'is', null)
+      .lte('trial_end_date', now),
+  ]);
+
+  let trialConversions = 0;
+  if (expiredUsers && expiredUsers.length > 0) {
+    const expiredIds = expiredUsers.map((u: { id: string }) => u.id);
+    const { count } = await supabase
+      .from('payments')
+      .select('*', { count: 'exact', head: true })
+      .in('user_id', expiredIds)
+      .eq('status', 'completed');
+    trialConversions = count ?? 0;
+  }
+
+  return {
+    usersOnTrial: usersOnTrial ?? 0,
+    trialExpired: trialExpired ?? 0,
+    trialConversions,
+  };
+}

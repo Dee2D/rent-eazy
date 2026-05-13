@@ -1,10 +1,11 @@
-import { Users, Building2, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { Users, Building2, CheckCircle, Clock, TrendingUp, Gift, TimerOff, ArrowRightLeft } from 'lucide-react';
 import {
   getAdminStats,
   getRecentListings,
   getRecentPayments,
   getListingsChartData,
   getRevenueChartData,
+  getTrialStats,
 } from '@/lib/supabase/admin';
 import StatsCard from '@/components/admin/StatsCard';
 import Charts from '@/components/admin/Charts';
@@ -25,12 +26,13 @@ function paymentBadge(status: string) {
 }
 
 export default async function AdminPage() {
-  const [stats, recentListings, recentPayments, listingsChart, revenueChart] = await Promise.all([
+  const [stats, recentListings, recentPayments, listingsChart, revenueChart, trialStats] = await Promise.all([
     getAdminStats(),
     getRecentListings(6),
     getRecentPayments(6),
     getListingsChartData(),
     getRevenueChartData(),
+    getTrialStats(),
   ]);
 
   return (
@@ -40,7 +42,7 @@ export default async function AdminPage() {
         <p className="text-sm text-stone-500 dark:text-slate-400 mt-0.5">Platform snapshot</p>
       </div>
 
-      {/* Stats */}
+      {/* Platform stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatsCard title="Total Users"      value={stats.totalUsers}      icon={Users}        color="blue" />
         <StatsCard title="Total Properties" value={stats.totalProperties} icon={Building2}    color="orange" />
@@ -53,6 +55,16 @@ export default async function AdminPage() {
           color="purple"
           subtitle="completed payments"
         />
+      </div>
+
+      {/* Trial analytics */}
+      <div>
+        <h2 className="text-base font-semibold text-stone-700 dark:text-slate-200 mb-3">Trial Analytics</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatsCard title="Users on Trial"      value={trialStats.usersOnTrial}      icon={Gift}           color="green" subtitle="active free trial" />
+          <StatsCard title="Expired Trials"      value={trialStats.trialExpired}      icon={TimerOff}       color="red"   subtitle="trial ended" />
+          <StatsCard title="Trial Conversions"   value={trialStats.trialConversions}  icon={ArrowRightLeft} color="blue"  subtitle="paid after trial" />
+        </div>
       </div>
 
       {/* Charts */}

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getLandlordProperties } from '@/lib/supabase/properties';
 import LandlordDashboardClient from './LandlordDashboardClient';
+import TrialBanner from '@/components/trial/TrialBanner';
+import type { Profile } from '@/types';
 
 const HOW_TO_STEPS = [
   { icon: '📍', title: 'Pin your location', body: 'Use the interactive map to drop a pin at the exact address. Accuracy helps tenants find you faster.' },
@@ -35,6 +37,9 @@ export default async function LandlordPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      {/* Trial banner */}
+      <TrialBanner profile={profile as Profile | null} />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
