@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/supabase/verify-admin';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { writeAuditLog } from '@/lib/audit';
 
 const ALLOWED_STATUSES = ['reviewed', 'resolved', 'dismissed'] as const;
 
@@ -25,5 +26,11 @@ export async function PATCH(
     .eq('id', id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await writeAuditLog(
+    status === 'resolved' ? 'report.resolved' : 'report.dismissed',
+    'report', id, admin.id
+  );
+
   return NextResponse.json({ success: true });
 }

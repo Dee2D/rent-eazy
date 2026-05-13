@@ -2,8 +2,20 @@ export type UserRole = 'tenant' | 'landlord' | 'provider' | 'admin';
 export type PaymentPeriod = 'monthly' | '6_months' | 'yearly';
 export type PropertyType = 'apartment' | 'house' | 'bedsitter';
 export type ListingType = 'landlord' | 'broker' | 'agent';
-export type PaymentStatus = 'pending' | 'completed' | 'failed';
+export type MobileMoneyProvider = 'mtn' | 'airtel';
+
+// Matches the DB CHECK constraint (see migration: production_hardening)
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'expired';
 export type PaymentType = 'listing' | 'subscription';
+
+export type AuditAction =
+  | 'payment.initiated' | 'payment.completed' | 'payment.failed' | 'payment.refunded'
+  | 'listing.activated' | 'listing.deactivated' | 'listing.deleted' | 'listing.renewed'
+  | 'provider.subscribed' | 'provider.deactivated'
+  | 'trial.activated' | 'trial.expired'
+  | 'user.role_changed' | 'user.deactivated' | 'user.reactivated'
+  | 'report.submitted' | 'report.resolved' | 'report.dismissed'
+  | 'admin.action';
 
 export interface Profile {
   id: string;
@@ -96,6 +108,20 @@ export interface Payment {
   status: PaymentStatus;
   reference: string | null;
   reference_id: string | null;
+  phone_number: string | null;
+  mobile_provider: MobileMoneyProvider | null;
+  verified_at: string | null;
+  created_at: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  actor_id: string | null;
+  action: AuditAction;
+  entity_type: string;
+  entity_id: string | null;
+  metadata: Record<string, unknown> | null;
+  ip_address: string | null;
   created_at: string;
 }
 

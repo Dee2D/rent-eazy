@@ -15,6 +15,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+  const isAdminRoute = pathname.startsWith('/admin');
 
   if (!supabaseUrl || !supabaseKey) {
     if (isProtected) {
@@ -27,9 +28,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
+      getAll() { return request.cookies.getAll(); },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         supabaseResponse = NextResponse.next({ request });
@@ -42,8 +41,23 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Unauthenticated: redirect to login for protected routes
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return withSecurityHeaders(NextResponse.redirect(new URL('/login', request.url)));
+  }
+
+  // Admin routes: verify admin role from profiles table.
+  // The anon client can read the authenticated user's own profile via RLS.
+  if (user && isAdminRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      return withSecurityHeaders(NextResponse.redirect(new URL('/dashboard', request.url)));
+    }
   }
 
   return withSecurityHeaders(supabaseResponse);

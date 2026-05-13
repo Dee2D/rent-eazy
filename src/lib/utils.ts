@@ -49,7 +49,11 @@ export function formatPeriod(period: string): string {
 }
 
 export function generatePaymentReference(): string {
-  return `ERU-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  // Cryptographically random — not guessable or predictable
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return `ERU-${Date.now()}-${hex}`;
 }
 
 export function isPropertyActive(property: {

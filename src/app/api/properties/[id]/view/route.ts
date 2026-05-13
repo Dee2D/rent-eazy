@@ -1,28 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { checkRateLimit, getClientIp, isValidUUID } from '@/lib/security';
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  if (!id) return NextResponse.json({ ok: false }, { status: 400 });
+
+  if (!id || !isValidUUID(id)) {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  // Rate limit: 1 view per IP per property per 30 minutes
+  const ip = getClientIp(request.headers);
+  const rl = checkRateLimit(`view:${ip}:${id}`, 1, 30 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json({ ok: true }); // silent — don't tell scrapers they're blocked
+  }
 
   try {
     const supabase = await createServiceRoleClient();
-    const { data } = await supabase
-      .from('properties')
-      .select('view_count')
-      .eq('id', id)
-      .single();
-
-    if (data) {
-      await supabase
-        .from('properties')
-        .update({ view_count: (data.view_count ?? 0) + 1 })
-        .eq('id', id);
-    }
-  } catch { /* silent — view tracking must never break page rendering */ }
+    // Atomic increment — no read-modify-write race condition
+    await supabase.rpc('increment_property_view_count', { property_id: id });
+  } catch {
+    // View tracking must never break page rendering
+  }
 
   return NextResponse.json({ ok: true });
 }
