@@ -168,3 +168,24 @@ export interface MapMarker {
   subtitle: string;
   linkHref: string;
 }
+
+export interface FraudFlag {
+  id: string;
+  entity_type: 'listing' | 'user' | 'payment';
+  entity_id: string;
+  fraud_score: number;
+  flags: string[];
+  action: 'allow' | 'review' | 'reject';
+  reviewed: boolean;
+  created_at: string;
+}
+
+export interface SystemBackup {
+  id: string;
+  backup_type: 'daily' | 'weekly';
+  status: 'running' | 'completed' | 'failed';
+  stats: Record<string, number> | null;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+}

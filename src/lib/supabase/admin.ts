@@ -366,3 +366,70 @@ export async function unblockIP(ipAddress: string): Promise<void> {
   const supabase = await createServiceRoleClient();
   await supabase.from('blocked_ips').delete().eq('ip_address', ipAddress);
 }
+
+// ── System health dashboard ───────────────────────────────────────────────────
+
+export interface SystemHealth {
+  activeListings:    number;
+  totalUsers:        number;
+  pendingPayments:   number;
+  fraudFlagsToday:   number;
+  blockedIPs:        number;
+  lastBackup:        SystemBackupRow | null;
+  recentFraudFlags:  FraudFlagRow[];
+}
+
+export interface SystemBackupRow {
+  id:           string;
+  backup_type:  string;
+  status:       string;
+  stats:        Record<string, number> | null;
+  error_message: string | null;
+  started_at:   string;
+  completed_at: string | null;
+}
+
+export interface FraudFlagRow {
+  id:           string;
+  entity_type:  string;
+  entity_id:    string;
+  fraud_score:  number;
+  flags:        string[];
+  action:       string;
+  reviewed:     boolean;
+  created_at:   string;
+}
+
+export async function getSystemHealth(): Promise<SystemHealth> {
+  const supabase = await createServiceRoleClient();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [
+    { count: activeListings },
+    { count: totalUsers },
+    { count: pendingPayments },
+    { count: fraudFlagsToday },
+    { count: blockedIPs },
+    { data: lastBackupRows },
+    { data: recentFraudFlags },
+  ] = await Promise.all([
+    supabase.from('properties').select('id', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+    supabase.from('payments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('fraud_flags').select('id', { count: 'exact', head: true }).gte('created_at', todayStart.toISOString()),
+    supabase.from('blocked_ips').select('id', { count: 'exact', head: true }),
+    supabase.from('system_backups').select('*').order('started_at', { ascending: false }).limit(1),
+    supabase.from('fraud_flags').select('*').order('created_at', { ascending: false }).limit(10),
+  ]);
+
+  return {
+    activeListings:   activeListings ?? 0,
+    totalUsers:       totalUsers ?? 0,
+    pendingPayments:  pendingPayments ?? 0,
+    fraudFlagsToday:  fraudFlagsToday ?? 0,
+    blockedIPs:       blockedIPs ?? 0,
+    lastBackup:       (lastBackupRows as SystemBackupRow[])?.[0] ?? null,
+    recentFraudFlags: (recentFraudFlags as FraudFlagRow[]) ?? [],
+  };
+}

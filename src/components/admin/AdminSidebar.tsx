@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Building2, Users, CreditCard, Shield, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, CreditCard, Shield, Monitor, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/admin/users',      label: 'Users',       icon: Users },
   { href: '/admin/payments',   label: 'Payments',    icon: CreditCard },
   { href: '/admin/security',   label: 'Security',    icon: Shield },
+  { href: '/admin/system',     label: 'System',      icon: Monitor },
 ];
 
 export default function AdminSidebar() {
