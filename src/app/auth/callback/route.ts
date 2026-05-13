@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { sendWelcomeEmail } from '@/lib/email/welcome';
+import type { UserRole } from '@/types';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -39,7 +41,7 @@ export async function GET(request: NextRequest) {
         const trialEnd = new Date(trialStart);
         trialEnd.setMonth(trialEnd.getMonth() + 3);
 
-        await supabase.from('profiles').upsert(
+        const { data: upsertResult } = await supabase.from('profiles').upsert(
           {
             id: user.id,
             full_name: meta.full_name,
@@ -53,6 +55,16 @@ export async function GET(request: NextRequest) {
           },
           { onConflict: 'id', ignoreDuplicates: true }
         );
+
+        // Send welcome email only on first profile creation (ignoreDuplicates means
+        // the upsert returns null data when the row already existed)
+        if (upsertResult && user.email) {
+          sendWelcomeEmail({
+            name: meta.full_name,
+            email: user.email,
+            role: (meta.role ?? 'tenant') as UserRole,
+          }); // fire-and-forget — never await
+        }
       }
 
       return NextResponse.redirect(`${origin}${next}`);

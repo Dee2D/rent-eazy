@@ -11,6 +11,7 @@ import {
 import StatsCard from '@/components/admin/StatsCard';
 import Charts from '@/components/admin/Charts';
 import SendReportButton from '@/components/admin/SendReportButton';
+import ReportsPanel from '@/components/admin/ReportsPanel';
 import { formatUGX } from '@/lib/utils';
 
 function statusBadge(isActive: boolean, isTaken: boolean, expiresAt: string | null) {
@@ -85,20 +86,7 @@ export default async function AdminPage() {
             </div>
             <span className="text-xs text-stone-400 dark:text-slate-500">{recentReports.length} pending</span>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-stone-100 dark:border-slate-700 divide-y divide-stone-100 dark:divide-slate-700">
-            {recentReports.map((r) => (
-              <div key={r.id} className="px-5 py-3 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-stone-800 dark:text-slate-100 capitalize">
-                    {r.type.replace('_', ' ')} · <span className="text-stone-400 dark:text-slate-500 capitalize">{r.target_type}</span>
-                  </p>
-                  <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5 truncate">{r.reason}</p>
-                  <p className="text-xs text-stone-300 dark:text-slate-600 mt-0.5">{new Date(r.created_at).toLocaleDateString()}</p>
-                </div>
-                <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 capitalize">{r.status}</span>
-              </div>
-            ))}
-          </div>
+          <ReportsPanel reports={recentReports} />
         </div>
       )}
 

@@ -78,6 +78,11 @@ export default function ListingCard({ property: p, onMarkTaken, onRenew }: Listi
               {new Date(p.expires_at).toLocaleDateString('en-UG', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
           )}
+          {typeof p.view_count === 'number' && p.view_count > 0 && (
+            <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">
+              👁 {p.view_count.toLocaleString()} view{p.view_count !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
 
         {/* Actions */}

@@ -48,6 +48,7 @@ export interface Property {
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  view_count: number;
   property_images?: PropertyImage[];
   profiles?: Profile;
 }
@@ -99,6 +100,7 @@ export interface Payment {
 }
 
 export interface PropertyFilters {
+  q?: string;
   district?: string;
   area_name?: string;
   min_price?: number;

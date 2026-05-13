@@ -22,6 +22,8 @@ import { formatUGX, formatPeriod } from '@/lib/utils';
 import type { MapMarker } from '@/types';
 import MapViewClient from '@/components/map/MapViewClient';
 import PropertyImageGallery from '@/components/property/PropertyImageGallery';
+import PropertyViewTracker from '@/components/property/PropertyViewTracker';
+import ShareButton from '@/components/property/ShareButton';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Plumbing:           '🔧',
@@ -100,8 +102,49 @@ export default async function PropertyDetailPage({
     linkHref: `/properties/${property.id}`,
   };
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://rent-eazy.vercel.app';
+  const pageUrl = `${appUrl}/properties/${property.id}`;
+  const primaryImage = property.property_images?.[0]?.image_url;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: property.title,
+    description: property.description ?? `${property.bedrooms}-bedroom ${property.property_type} in ${property.area_name}, ${property.district}.`,
+    url: pageUrl,
+    ...(primaryImage && { image: primaryImage }),
+    offers: {
+      '@type': 'Offer',
+      price: property.price_ugx,
+      priceCurrency: 'UGX',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: property.area_name,
+      addressRegion: property.district,
+      addressCountry: 'UG',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: property.latitude,
+      longitude: property.longitude,
+    },
+    numberOfRooms: property.bedrooms,
+    floorSize: undefined,
+    accommodationCategory: property.property_type,
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+      {/* JSON-LD structured data for Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Client-side view tracker — fires once per page visit even on ISR cache hits */}
+      <PropertyViewTracker propertyId={property.id} />
+
       <div className="mb-5">
         <PropertyImageGallery
           images={property.property_images ?? []}
@@ -119,9 +162,12 @@ export default async function PropertyDetailPage({
               <span className="truncate">{property.area_name}, {property.district}</span>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-xl font-bold text-orange-500">{formatUGX(property.price_ugx)}</p>
-            <p className="text-stone-400 dark:text-slate-500 text-xs">{formatPeriod(property.payment_period)}</p>
+          <div className="text-right shrink-0 flex flex-col items-end gap-2">
+            <div>
+              <p className="text-xl font-bold text-orange-500">{formatUGX(property.price_ugx)}</p>
+              <p className="text-stone-400 dark:text-slate-500 text-xs">{formatPeriod(property.payment_period)}</p>
+            </div>
+            <ShareButton title={property.title} url={pageUrl} />
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronUp, SlidersHorizontal, Search, X } from 'lucide-react';
 import type { PropertyFilters as Filters, PropertyType } from '@/types';
 import { DISTRICTS } from '@/lib/constants';
 
@@ -15,6 +15,7 @@ export default function PropertyFilters() {
   const [isOpen, setIsOpen] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({
+    q: searchParams.get('q') ?? '',
     district: searchParams.get('district') ?? '',
     area_name: searchParams.get('area_name') ?? '',
     min_price: searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined,
@@ -24,6 +25,7 @@ export default function PropertyFilters() {
   });
 
   const activeFilterCount = [
+    filters.q,
     filters.district,
     filters.area_name,
     filters.min_price,
@@ -34,11 +36,12 @@ export default function PropertyFilters() {
 
   function applyFilters() {
     const params = new URLSearchParams();
-    if (filters.district) params.set('district', filters.district);
-    if (filters.area_name) params.set('area_name', filters.area_name);
-    if (filters.min_price) params.set('min_price', String(filters.min_price));
-    if (filters.max_price) params.set('max_price', String(filters.max_price));
-    if (filters.bedrooms) params.set('bedrooms', String(filters.bedrooms));
+    if (filters.q)             params.set('q', filters.q);
+    if (filters.district)      params.set('district', filters.district);
+    if (filters.area_name)     params.set('area_name', filters.area_name);
+    if (filters.min_price)     params.set('min_price', String(filters.min_price));
+    if (filters.max_price)     params.set('max_price', String(filters.max_price));
+    if (filters.bedrooms)      params.set('bedrooms', String(filters.bedrooms));
     if (filters.property_type) params.set('property_type', filters.property_type);
     router.push(`/properties?${params.toString()}`);
     setIsOpen(false);
@@ -49,12 +52,38 @@ export default function PropertyFilters() {
     router.push('/properties');
   }
 
-  function handleDistrictChange(value: string) {
-    setFilters({ ...filters, district: value, area_name: '' });
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') applyFilters();
   }
 
   const filterBody = (
     <div className="space-y-4 pt-2">
+
+      {/* Keyword search */}
+      <div>
+        <label className={labelCls}>Search by keyword</label>
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500 pointer-events-none" />
+          <input
+            type="text"
+            value={filters.q ?? ''}
+            onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g. Ntinda 2-bedroom..."
+            className="w-full pl-9 pr-3 py-2.5 border border-stone-200 dark:border-slate-600 rounded-2xl text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
+          />
+          {filters.q && (
+            <button
+              onClick={() => setFilters({ ...filters, q: '' })}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-500 dark:text-slate-500 dark:hover:text-slate-300"
+              aria-label="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* District */}
       <div>
         <label className={labelCls}>District</label>
@@ -62,7 +91,7 @@ export default function PropertyFilters() {
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm leading-none pointer-events-none select-none">📍</span>
           <select
             value={filters.district ?? ''}
-            onChange={(e) => handleDistrictChange(e.target.value)}
+            onChange={(e) => setFilters({ ...filters, district: e.target.value, area_name: '' })}
             className="w-full pl-9 pr-8 py-2.5 border border-stone-200 dark:border-slate-600 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 appearance-none cursor-pointer transition-colors"
           >
             <option value="">All Districts</option>
@@ -76,20 +105,14 @@ export default function PropertyFilters() {
 
       {/* Area */}
       <div>
-        <label className={labelCls}>Area</label>
-        <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-slate-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
-          <input
-            type="text"
-            value={filters.area_name ?? ''}
-            onChange={(e) => setFilters({ ...filters, area_name: e.target.value })}
-            disabled={!filters.district}
-            placeholder={filters.district ? 'e.g. Ntinda, Kiwatule, Najjera' : 'Select a district first'}
-            className="w-full pl-9 pr-3 py-2.5 border border-stone-200 dark:border-slate-600 rounded-2xl text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-400 disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-stone-50 dark:disabled:bg-slate-900/40 transition-colors"
-          />
-        </div>
+        <label className={labelCls}>Area / Neighbourhood</label>
+        <input
+          type="text"
+          value={filters.area_name ?? ''}
+          onChange={(e) => setFilters({ ...filters, area_name: e.target.value })}
+          placeholder="e.g. Ntinda, Kiwatule..."
+          className={inputCls}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -123,18 +146,19 @@ export default function PropertyFilters() {
 
       <div className="flex gap-2 pt-1">
         <button onClick={applyFilters} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-3 rounded-xl transition-colors">
-          Apply Filters
+          Search
         </button>
-        <button onClick={clearFilters} className="px-4 py-3 text-sm text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200 border border-stone-200 dark:border-slate-600 rounded-xl transition-colors">
-          Clear
-        </button>
+        {activeFilterCount > 0 && (
+          <button onClick={clearFilters} className="px-4 py-3 text-sm text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200 border border-stone-200 dark:border-slate-600 rounded-xl transition-colors">
+            Clear
+          </button>
+        )}
       </div>
     </div>
   );
 
   return (
     <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl transition-colors duration-200">
-      {/* Header — always visible, toggle on mobile */}
       <button
         onClick={() => setIsOpen((v) => !v)}
         className="w-full flex items-center justify-between p-5 md:cursor-default"
@@ -154,7 +178,6 @@ export default function PropertyFilters() {
         </span>
       </button>
 
-      {/* Body — always visible on desktop, toggled on mobile */}
       <div className={`px-5 pb-5 ${isOpen ? 'block' : 'hidden md:block'}`}>
         {filterBody}
       </div>
