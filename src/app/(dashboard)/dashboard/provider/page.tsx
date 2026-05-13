@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getProviderByProfileId, getServiceCategories } from '@/lib/supabase/providers';
 import ProviderClient from './ProviderClient';
 import TrialStatusCard from '@/components/trial/TrialStatusCard';
+import PhoneVerification from '@/components/security/PhoneVerification';
 import type { Profile } from '@/types';
 
 export default async function ProviderDashboardPage() {
@@ -38,18 +39,36 @@ export default async function ProviderDashboardPage() {
     // DB not configured
   }
 
+  const isPhoneVerified = profile?.phone_verified ?? false;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-2xl font-bold text-stone-900 dark:text-white">Provider Profile</h1>
+
       <TrialStatusCard profile={profile as Profile | null} />
-      <ProviderClient
-        userId={user.id}
-        phoneNumber={profile?.phone_number ?? ''}
-        existingProvider={provider}
-        categories={categories}
-        subscription={subscription}
-        trialEndDate={profile?.trial_end_date ?? null}
-      />
+
+      {/* Phone verification is required for service providers */}
+      <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+        <PhoneVerification
+          initialPhone={profile?.phone_number ?? ''}
+          isVerified={isPhoneVerified}
+        />
+      </div>
+
+      {isPhoneVerified ? (
+        <ProviderClient
+          userId={user.id}
+          phoneNumber={profile?.phone_number ?? ''}
+          existingProvider={provider}
+          categories={categories}
+          subscription={subscription}
+          trialEndDate={profile?.trial_end_date ?? null}
+        />
+      ) : (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 text-sm text-amber-700 dark:text-amber-300">
+          Verify your phone number above to create your service provider profile and appear on the map.
+        </div>
+      )}
     </div>
   );
 }

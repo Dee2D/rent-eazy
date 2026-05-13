@@ -244,3 +244,125 @@ export async function getRecentReports(limit = 5): Promise<AdminReport[]> {
     .limit(limit);
   return (data as AdminReport[]) ?? [];
 }
+
+// ── Security dashboard ────────────────────────────────────────────────────────
+
+export interface SecurityStats {
+  failedLoginsLast24h: number;
+  totalLoginLogs: number;
+  blockedIPs: number;
+  suspiciousIPs: SuspiciousIP[];
+}
+
+export interface SuspiciousIP {
+  ip_address: string;
+  failure_count: number;
+  last_attempt: string;
+  distinct_emails: number;
+}
+
+export interface LoginLogEntry {
+  id: string;
+  email: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  success: boolean;
+  failure_reason: string | null;
+  created_at: string;
+  profiles: { full_name: string } | null;
+}
+
+export interface BlockedIPEntry {
+  id: string;
+  ip_address: string;
+  reason: string | null;
+  expires_at: string | null;
+  created_at: string;
+  blocked_by_profile: { full_name: string } | null;
+}
+
+export async function getSecurityStats(): Promise<SecurityStats> {
+  const supabase = await createServiceRoleClient();
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const since1h  = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+  const [
+    { count: failedLoginsLast24h },
+    { count: totalLoginLogs },
+    { count: blockedIPs },
+    { data: recentFailures },
+  ] = await Promise.all([
+    supabase.from('login_logs').select('*', { count: 'exact', head: true }).eq('success', false).gte('created_at', since24h),
+    supabase.from('login_logs').select('*', { count: 'exact', head: true }),
+    supabase.from('blocked_ips').select('*', { count: 'exact', head: true }),
+    supabase.from('login_logs').select('ip_address, email, created_at').eq('success', false).gte('created_at', since1h),
+  ]);
+
+  // Aggregate suspicious IPs from recent failures
+  const ipMap = new Map<string, { count: number; emails: Set<string>; last: string }>();
+  for (const row of (recentFailures ?? [])) {
+    const key = row.ip_address ?? 'unknown';
+    const existing = ipMap.get(key) ?? { count: 0, emails: new Set(), last: row.created_at };
+    existing.count++;
+    if (row.email) existing.emails.add(row.email);
+    if (row.created_at > existing.last) existing.last = row.created_at;
+    ipMap.set(key, existing);
+  }
+
+  const suspiciousIPs: SuspiciousIP[] = Array.from(ipMap.entries())
+    .filter(([, v]) => v.count >= 3)
+    .map(([ip, v]) => ({
+      ip_address: ip,
+      failure_count: v.count,
+      last_attempt: v.last,
+      distinct_emails: v.emails.size,
+    }))
+    .sort((a, b) => b.failure_count - a.failure_count)
+    .slice(0, 20);
+
+  return {
+    failedLoginsLast24h: failedLoginsLast24h ?? 0,
+    totalLoginLogs: totalLoginLogs ?? 0,
+    blockedIPs: blockedIPs ?? 0,
+    suspiciousIPs,
+  };
+}
+
+export async function getRecentLoginLogs(limit = 50): Promise<LoginLogEntry[]> {
+  const supabase = await createServiceRoleClient();
+  const { data } = await supabase
+    .from('login_logs')
+    .select('id, email, ip_address, user_agent, success, failure_reason, created_at, profiles(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return (data as unknown as LoginLogEntry[]) ?? [];
+}
+
+export async function getBlockedIPs(): Promise<BlockedIPEntry[]> {
+  const supabase = await createServiceRoleClient();
+  const { data } = await supabase
+    .from('blocked_ips')
+    .select('id, ip_address, reason, expires_at, created_at')
+    .order('created_at', { ascending: false });
+  return (data as BlockedIPEntry[]) ?? [];
+}
+
+export async function blockIP(
+  ipAddress: string,
+  reason: string,
+  adminId: string,
+  expiresAt?: string
+): Promise<void> {
+  const supabase = await createServiceRoleClient();
+  await supabase.from('blocked_ips').upsert({
+    ip_address: ipAddress,
+    reason,
+    blocked_by: adminId,
+    expires_at: expiresAt ?? null,
+  }, { onConflict: 'ip_address' });
+}
+
+export async function unblockIP(ipAddress: string): Promise<void> {
+  const supabase = await createServiceRoleClient();
+  await supabase.from('blocked_ips').delete().eq('ip_address', ipAddress);
+}

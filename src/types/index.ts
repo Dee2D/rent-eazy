@@ -13,14 +13,18 @@ export type AuditAction =
   | 'listing.activated' | 'listing.deactivated' | 'listing.deleted' | 'listing.renewed'
   | 'provider.subscribed' | 'provider.deactivated'
   | 'trial.activated' | 'trial.expired'
-  | 'user.role_changed' | 'user.deactivated' | 'user.reactivated'
+  | 'user.role_changed' | 'user.deactivated' | 'user.reactivated' | 'user.banned'
   | 'report.submitted' | 'report.resolved' | 'report.dismissed'
+  | 'login.success' | 'login.failed' | 'login.blocked'
+  | 'phone.verified' | 'phone.otp_sent'
+  | 'admin.2fa_verified' | 'admin.ip_blocked' | 'admin.ip_unblocked'
   | 'admin.action';
 
 export interface Profile {
   id: string;
   full_name: string;
   phone_number: string | null;
+  phone_verified: boolean;
   role: UserRole;
   created_at: string;
   trial_start_date: string | null;
@@ -28,6 +32,26 @@ export interface Profile {
   is_trial_active: boolean;
   accepted_terms: boolean;
   accepted_terms_at: string | null;
+}
+
+export interface LoginLog {
+  id: string;
+  user_id: string | null;
+  email: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
+  success: boolean;
+  failure_reason: string | null;
+  created_at: string;
+}
+
+export interface BlockedIP {
+  id: string;
+  ip_address: string;
+  reason: string | null;
+  blocked_by: string | null;
+  expires_at: string | null;
+  created_at: string;
 }
 
 export interface Report {

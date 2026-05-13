@@ -1,25 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import dynamic from 'next/dynamic';
 
-// Friendly messages that don't leak whether an account exists
-const AUTH_ERROR_MAP: Record<string, string> = {
-  'Invalid login credentials': 'Incorrect email or password.',
-  'Email not confirmed': 'Please confirm your email before signing in. Check your inbox.',
-  'Too many requests': 'Too many sign-in attempts. Please wait a few minutes and try again.',
-  'User not found': 'Incorrect email or password.',
-};
-
-function normalizeAuthError(msg: string): string {
-  for (const [key, friendly] of Object.entries(AUTH_ERROR_MAP)) {
-    if (msg.includes(key)) return friendly;
-  }
-  return 'Sign-in failed. Please check your credentials and try again.';
-}
+const TurnstileWidget = dynamic(() => import('@/components/security/TurnstileWidget'), { ssr: false });
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,9 +16,16 @@ export default function LoginPage() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
 
-  // Client-side cooldown — prevents rapid repeated submissions
-  const lastAttemptRef = useRef(0);
+  const turnstileTokenRef = useRef<string>('');
+  const lastAttemptRef    = useRef(0);
   const COOLDOWN_MS = 2000;
+
+  const onTurnstileVerify = useCallback((token: string) => {
+    turnstileTokenRef.current = token;
+  }, []);
+  const onTurnstileExpire = useCallback(() => {
+    turnstileTokenRef.current = '';
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,26 +37,27 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        turnstileToken: turnstileTokenRef.current,
+      }),
     });
 
-    if (authError) {
-      setError(normalizeAuthError(authError.message));
-      setLoading(false);
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok || !data.success) {
+      setError(data.error ?? 'Sign-in failed. Please try again.');
+      turnstileTokenRef.current = '';
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single();
-
     router.refresh();
-    router.push(profile?.role === 'admin' ? '/admin' : '/dashboard');
+    router.push(data.role === 'admin' ? '/admin' : '/dashboard');
   }
 
   const inputCls =
@@ -118,10 +113,7 @@ export default function LoginPage() {
               <label className="text-sm font-medium text-stone-700 dark:text-slate-200" htmlFor="password">
                 Password
               </label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-orange-500 hover:underline"
-              >
+              <Link href="/forgot-password" className="text-xs text-orange-500 hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -146,6 +138,8 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          <TurnstileWidget onVerify={onTurnstileVerify} onExpire={onTurnstileExpire} />
 
           <button
             type="submit"

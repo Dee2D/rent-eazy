@@ -65,15 +65,68 @@ export const SECURITY_HEADERS: Record<string, string> = {
   'X-DNS-Prefetch-Control':    'on',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline' https://api.mapbox.com https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https://*.supabase.co https://api.mapbox.com https://events.mapbox.com",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.resend.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.resend.com https://challenges.cloudflare.com",
     "worker-src blob:",
+    "frame-src https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
   ].join('; '),
 };
+
+// ─── Cloudflare Turnstile CAPTCHA ─────────────────────────────────────────────
+
+/**
+ * Verify a Cloudflare Turnstile token server-side.
+ * Returns true immediately when TURNSTILE_SECRET_KEY is not configured (dev mode).
+ */
+export async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true; // graceful degradation in dev / when not configured
+
+  if (!token) return false;
+
+  try {
+    const body = new URLSearchParams({
+      secret,
+      response: token,
+      ...(ip ? { remoteip: ip } : {}),
+    });
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body,
+    });
+    const data = (await res.json()) as { success: boolean };
+    return data.success === true;
+  } catch {
+    // Network error — fail open in dev, fail closed in prod
+    return process.env.NODE_ENV !== 'production';
+  }
+}
+
+// ─── Server-side MIME / magic bytes validation ────────────────────────────────
+
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png':  [[0x89, 0x50, 0x4E, 0x47]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF....WEBP — first 4 bytes
+};
+
+/**
+ * Validate the magic bytes of an image ArrayBuffer against the declared MIME type.
+ * Prevents renamed executables from being uploaded as images.
+ */
+export function validateImageMagicBytes(buffer: ArrayBuffer, declaredMime: string): boolean {
+  const allowed = MAGIC_BYTES[declaredMime];
+  if (!allowed) return false;
+
+  const bytes = new Uint8Array(buffer.slice(0, 12));
+  return allowed.some((signature) =>
+    signature.every((byte, i) => bytes[i] === byte)
+  );
+}
 
 // ─── In-process rate limiter ──────────────────────────────────────────────────
 // Per Vercel serverless instance. Sufficient for basic abuse prevention.
