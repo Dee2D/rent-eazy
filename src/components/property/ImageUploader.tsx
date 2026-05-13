@@ -2,8 +2,7 @@
 
 import { useRef, useState, useMemo, useEffect } from 'react';
 import { MIN_IMAGES } from '@/lib/constants';
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+import { ALLOWED_IMAGE_TYPES, validateImageFile } from '@/lib/security';
 
 interface ImageUploaderProps {
   files: File[];
@@ -21,14 +20,17 @@ export default function ImageUploader({ files, onChange, error }: ImageUploaderP
 
   function addFiles(incoming: FileList | null) {
     if (!incoming) return;
-    const all = Array.from(incoming).filter((f) => f.type.startsWith('image/'));
-    const oversized = all.filter((f) => f.size > MAX_FILE_SIZE);
-    if (oversized.length > 0) {
-      setSizeError(`${oversized.length} file(s) skipped — max size is 5 MB each`);
-    } else {
-      setSizeError(null);
+    const errors: string[] = [];
+    const valid: File[] = [];
+    for (const f of Array.from(incoming)) {
+      const err = validateImageFile(f);
+      if (err) {
+        errors.push(err);
+      } else {
+        valid.push(f);
+      }
     }
-    const valid = all.filter((f) => f.size <= MAX_FILE_SIZE);
+    setSizeError(errors.length > 0 ? errors[0] : null);
     const merged = [...files, ...valid].slice(0, 20);
     onChange(merged);
   }
@@ -61,7 +63,7 @@ export default function ImageUploader({ files, onChange, error }: ImageUploaderP
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept={ALLOWED_IMAGE_TYPES.join(',')}
           multiple
           className="hidden"
           onChange={(e) => addFiles(e.target.files)}

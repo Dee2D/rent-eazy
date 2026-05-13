@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
             trial_start_date: trialStart.toISOString(),
             trial_end_date: trialEnd.toISOString(),
             is_trial_active: true,
+            accepted_terms: meta.accepted_terms === true,
+            accepted_terms_at: meta.accepted_terms_at ?? null,
           },
           { onConflict: 'id', ignoreDuplicates: true }
         );

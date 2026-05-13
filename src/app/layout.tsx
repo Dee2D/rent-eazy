@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNav from "@/components/layout/BottomNav";
 import BackgroundPattern from "@/components/layout/BackgroundPattern";
+import CookieBanner from "@/components/CookieBanner";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -78,6 +79,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <BottomNav />
+        <CookieBanner />
       </body>
     </html>
   );

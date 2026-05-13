@@ -27,8 +27,13 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-stone-700 dark:border-slate-800 text-xs text-stone-500 dark:text-slate-600 text-center">
-        © {new Date().getFullYear()} Rent Eazy. All rights reserved.
+      <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-stone-700 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500 dark:text-slate-600">
+        <span>© {new Date().getFullYear()} Rent Eazy. All rights reserved.</span>
+        <div className="flex items-center gap-4">
+          <Link href="/terms" className="hover:text-orange-400 transition-colors">Terms &amp; Conditions</Link>
+          <Link href="/privacy-policy" className="hover:text-orange-400 transition-colors">Privacy Policy</Link>
+          <Link href="/report" className="hover:text-orange-400 transition-colors">Report Abuse</Link>
+        </div>
       </div>
     </footer>
   );

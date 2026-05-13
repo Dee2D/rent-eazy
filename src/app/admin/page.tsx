@@ -1,4 +1,4 @@
-import { Users, Building2, CheckCircle, Clock, TrendingUp, Gift, TimerOff, ArrowRightLeft } from 'lucide-react';
+import { Users, Building2, CheckCircle, Clock, TrendingUp, Gift, TimerOff, ArrowRightLeft, Flag, ShieldCheck } from 'lucide-react';
 import {
   getAdminStats,
   getRecentListings,
@@ -6,6 +6,7 @@ import {
   getListingsChartData,
   getRevenueChartData,
   getTrialStats,
+  getRecentReports,
 } from '@/lib/supabase/admin';
 import StatsCard from '@/components/admin/StatsCard';
 import Charts from '@/components/admin/Charts';
@@ -26,13 +27,14 @@ function paymentBadge(status: string) {
 }
 
 export default async function AdminPage() {
-  const [stats, recentListings, recentPayments, listingsChart, revenueChart, trialStats] = await Promise.all([
+  const [stats, recentListings, recentPayments, listingsChart, revenueChart, trialStats, recentReports] = await Promise.all([
     getAdminStats(),
     getRecentListings(6),
     getRecentPayments(6),
     getListingsChartData(),
     getRevenueChartData(),
     getTrialStats(),
+    getRecentReports(5),
   ]);
 
   return (
@@ -72,6 +74,41 @@ export default async function AdminPage() {
 
       {/* Email reports */}
       <SendReportButton />
+
+      {/* Reports */}
+      {recentReports.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Flag size={16} className="text-red-500" />
+              <h2 className="text-base font-semibold text-stone-700 dark:text-slate-200">Recent Abuse Reports</h2>
+            </div>
+            <span className="text-xs text-stone-400 dark:text-slate-500">{recentReports.length} pending</span>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-stone-100 dark:border-slate-700 divide-y divide-stone-100 dark:divide-slate-700">
+            {recentReports.map((r) => (
+              <div key={r.id} className="px-5 py-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-stone-800 dark:text-slate-100 capitalize">
+                    {r.type.replace('_', ' ')} · <span className="text-stone-400 dark:text-slate-500 capitalize">{r.target_type}</span>
+                  </p>
+                  <p className="text-xs text-stone-500 dark:text-slate-400 mt-0.5 truncate">{r.reason}</p>
+                  <p className="text-xs text-stone-300 dark:text-slate-600 mt-0.5">{new Date(r.created_at).toLocaleDateString()}</p>
+                </div>
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 capitalize">{r.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Compliance note */}
+      <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
+        <ShieldCheck size={18} className="text-green-600 dark:text-green-400 shrink-0" />
+        <p className="text-sm text-green-700 dark:text-green-300">
+          Security headers (CSP, X-Frame-Options, HSTS), terms consent tracking, and abuse reporting are all active on this platform.
+        </p>
+      </div>
 
       {/* Recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

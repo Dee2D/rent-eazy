@@ -1,5 +1,13 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { SECURITY_HEADERS } from '@/lib/security';
+
+function withSecurityHeaders(response: NextResponse): NextResponse {
+  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  return response;
+}
 
 export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,7 +20,7 @@ export async function middleware(request: NextRequest) {
     if (isProtected) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    return NextResponse.next({ request });
+    return withSecurityHeaders(NextResponse.next({ request }));
   }
 
   let supabaseResponse = NextResponse.next({ request });
@@ -38,9 +46,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  return supabaseResponse;
+  return withSecurityHeaders(supabaseResponse);
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$).*)'],
 };

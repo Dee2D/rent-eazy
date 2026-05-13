@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { sanitizeText, validatePassword } from '@/lib/security';
+import TermsCheckbox from '@/components/TermsCheckbox';
 import type { UserRole } from '@/types';
 
 type PasswordStrength = 'weak' | 'fair' | 'strong';
@@ -38,28 +40,45 @@ export default function RegisterPage() {
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState<string | null>(null);
   const [emailSent, setEmailSent]         = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const strength       = password ? getPasswordStrength(password) : null;
   const passwordsMatch = confirmPw === '' || password === confirmPw;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!termsAccepted) {
+      setError('You must accept the Terms & Conditions and Privacy Policy to continue.');
+      return;
+    }
     if (password !== confirmPw) {
       setError('Passwords do not match.');
+      return;
+    }
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setError(pwError);
       return;
     }
     setLoading(true);
     setError(null);
 
     const supabase = createClient();
+    const acceptedAt = new Date().toISOString();
 
     // Pass user data as metadata so the auth callback can create the profile
     // after email confirmation (when there is no active session yet).
     const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
+      email: email.trim().toLowerCase(),
       password,
       options: {
-        data: { full_name: fullName, phone_number: phone || null, role },
+        data: {
+          full_name: sanitizeText(fullName, 100),
+          phone_number: phone || null,
+          role,
+          accepted_terms: true,
+          accepted_terms_at: acceptedAt,
+        },
       },
     });
 
@@ -84,12 +103,14 @@ export default function RegisterPage() {
 
     const { error: profileError } = await supabase.from('profiles').insert({
       id: data.user.id,
-      full_name: fullName,
+      full_name: sanitizeText(fullName, 100),
       phone_number: phone || null,
       role,
       trial_start_date: trialStart.toISOString(),
       trial_end_date: trialEnd.toISOString(),
       is_trial_active: true,
+      accepted_terms: true,
+      accepted_terms_at: acceptedAt,
     });
 
     if (profileError) {
@@ -292,9 +313,12 @@ export default function RegisterPage() {
             </select>
           </div>
 
+          {/* Terms & Privacy consent */}
+          <TermsCheckbox checked={termsAccepted} onChange={setTermsAccepted} />
+
           <button
             type="submit"
-            disabled={loading || !passwordsMatch}
+            disabled={loading || !passwordsMatch || !termsAccepted}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
           >
             {loading ? 'Creating account…' : 'Create Account'}

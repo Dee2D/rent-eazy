@@ -14,6 +14,20 @@ export interface Profile {
   trial_start_date: string | null;
   trial_end_date: string | null;
   is_trial_active: boolean;
+  accepted_terms: boolean;
+  accepted_terms_at: string | null;
+}
+
+export interface Report {
+  id: string;
+  reporter_id: string | null;
+  type: 'fake_listing' | 'abusive_provider' | 'other';
+  target_id: string;
+  target_type: 'property' | 'provider';
+  reason: string;
+  details: string | null;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  created_at: string;
 }
 
 export interface Property {

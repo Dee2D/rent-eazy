@@ -28,6 +28,8 @@ export interface AdminUser {
   phone_number: string | null;
   role: string;
   created_at: string;
+  accepted_terms: boolean;
+  accepted_terms_at: string | null;
 }
 
 export interface AdminPayment {
@@ -158,7 +160,7 @@ export async function getAllUsers(): Promise<AdminUser[]> {
   const supabase = await createServiceRoleClient();
   const { data } = await supabase
     .from('profiles')
-    .select('id, full_name, phone_number, role, created_at')
+    .select('id, full_name, phone_number, role, created_at, accepted_terms, accepted_terms_at')
     .order('created_at', { ascending: false });
   return (data as AdminUser[]) ?? [];
 }
@@ -220,4 +222,25 @@ export async function getTrialStats(): Promise<TrialStats> {
     trialExpired: trialExpired ?? 0,
     trialConversions,
   };
+}
+
+export interface AdminReport {
+  id: string;
+  type: string;
+  target_id: string;
+  target_type: string;
+  reason: string;
+  status: string;
+  created_at: string;
+}
+
+export async function getRecentReports(limit = 5): Promise<AdminReport[]> {
+  const supabase = await createServiceRoleClient();
+  const { data } = await supabase
+    .from('reports')
+    .select('id, type, target_id, target_type, reason, status, created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return (data as AdminReport[]) ?? [];
 }

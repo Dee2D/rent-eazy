@@ -65,6 +65,7 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 dark:text-slate-400 uppercase tracking-wide">Name</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 dark:text-slate-400 uppercase tracking-wide hidden md:table-cell">Phone</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 dark:text-slate-400 uppercase tracking-wide">Role</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 dark:text-slate-400 uppercase tracking-wide hidden xl:table-cell">Terms</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-stone-500 dark:text-slate-400 uppercase tracking-wide hidden lg:table-cell">Joined</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -72,7 +73,7 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
             <tbody className="divide-y divide-stone-100 dark:divide-slate-700">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-stone-400 dark:text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-stone-400 dark:text-slate-500">
                     No users found.
                   </td>
                 </tr>
@@ -91,6 +92,15 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${roleColors[u.role] ?? roleColors.tenant}`}>
                         {u.role}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 hidden xl:table-cell">
+                      {u.accepted_terms ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium">
+                          <span aria-hidden>✓</span> Accepted
+                        </span>
+                      ) : (
+                        <span className="text-xs text-stone-400 dark:text-slate-500">Pending</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-xs text-stone-400 dark:text-slate-500">
                       {new Date(u.created_at).toLocaleDateString()}
