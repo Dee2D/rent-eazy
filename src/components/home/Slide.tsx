@@ -36,7 +36,7 @@ export default function Slide({ slide, direction }: SlideProps) {
       initial="enter"
       animate="center"
       exit="exit"
-      className="absolute inset-0 flex flex-col justify-between p-8 md:p-10"
+      className="absolute inset-0 flex flex-col justify-between p-4 md:p-8"
     >
       {/* Image */}
       <div className="relative w-full rounded-2xl overflow-hidden shadow-lg flex-1 min-h-0 mb-6">
@@ -57,7 +57,7 @@ export default function Slide({ slide, direction }: SlideProps) {
           {['For Everyone', 'For Tenants', 'For Landlords', 'Services'][slide.id - 1]}
         </span>
         <h2
-          className="text-2xl md:text-3xl font-extrabold text-stone-900 dark:text-white leading-tight mb-2"
+          className="text-xl md:text-3xl font-extrabold text-stone-900 dark:text-white leading-tight mb-2"
           style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
         >
           {slide.headline}

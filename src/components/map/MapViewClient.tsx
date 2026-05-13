@@ -18,6 +18,7 @@ interface MapViewClientProps {
   height?: string;
   interactive?: boolean;
   theme?: 'light' | 'dark';
+  flyTo?: [number, number] | null;
 }
 
 export default function MapViewClient(props: MapViewClientProps) {

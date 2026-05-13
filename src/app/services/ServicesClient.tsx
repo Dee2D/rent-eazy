@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, MapPin, Search, X, User } from 'lucide-react';
+import { Phone, MapPin, Search, X, User, SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 import type { ServiceProvider, ServiceCategory } from '@/types';
 import { DISTRICTS } from '@/lib/constants';
 
@@ -62,7 +62,7 @@ function ProviderCard({ provider }: { provider: ServiceProvider }) {
           {provider.slug && (
             <Link
               href={`/providers/${provider.slug}`}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 dark:hover:bg-slate-600 text-stone-700 dark:text-slate-200 text-sm font-medium px-3 py-2 rounded-xl transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 bg-stone-100 dark:bg-slate-700 hover:bg-stone-200 dark:hover:bg-slate-600 text-stone-700 dark:text-slate-200 text-sm font-medium px-3 py-2.5 rounded-xl transition-colors min-h-[44px]"
             >
               <User size={13} />
               Profile
@@ -73,7 +73,7 @@ function ProviderCard({ provider }: { provider: ServiceProvider }) {
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-3 py-2.5 rounded-xl transition-colors min-h-[44px]"
             >
               <Phone size={14} />
               WhatsApp
@@ -97,6 +97,7 @@ export default function ServicesClient({ providers, categories }: ServicesClient
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [district, setDistrict] = useState('');
   const [areaName, setAreaName] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filtered = providers.filter((p) => {
     const matchesCategory =
@@ -113,6 +114,11 @@ export default function ServicesClient({ providers, categories }: ServicesClient
   });
 
   const hasLocationFilter = district || areaName;
+  const activeFilterCount = [
+    activeCategory !== 'all' ? activeCategory : null,
+    district,
+    areaName,
+  ].filter(Boolean).length;
 
   function clearLocation() {
     setDistrict('');
@@ -121,10 +127,39 @@ export default function ServicesClient({ providers, categories }: ServicesClient
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
-      {/* Sidebar filters */}
-      <aside className="w-full md:w-60 shrink-0 space-y-4">
-        {/* Search */}
+      {/* Mobile: sticky search + filter toggle bar */}
+      <div className="md:hidden space-y-2">
         <div className="relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500" />
+          <input
+            type="search"
+            placeholder="Search providers…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-stone-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-stone-800 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+          />
+        </div>
+        <button
+          onClick={() => setFiltersOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 rounded-xl border border-stone-200 dark:border-slate-600 text-sm font-medium text-stone-700 dark:text-slate-200"
+        >
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={15} />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+                {activeFilterCount}
+              </span>
+            )}
+          </div>
+          {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      </div>
+
+      {/* Sidebar filters */}
+      <aside className={`w-full md:w-60 shrink-0 space-y-4 ${filtersOpen ? 'block' : 'hidden md:block'}`}>
+        {/* Search — desktop only (mobile search is above) */}
+        <div className="relative hidden md:block">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-slate-500" />
           <input
             type="search"
@@ -141,7 +176,7 @@ export default function ServicesClient({ providers, categories }: ServicesClient
           <div className="space-y-1">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+              className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 activeCategory === 'all'
                   ? 'bg-blue-500 text-white'
                   : 'text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-700'
@@ -157,7 +192,7 @@ export default function ServicesClient({ providers, categories }: ServicesClient
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.name)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     activeCategory === cat.name
                       ? 'bg-blue-500 text-white'
                       : 'text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-700'
@@ -188,7 +223,7 @@ export default function ServicesClient({ providers, categories }: ServicesClient
             <select
               value={district}
               onChange={(e) => { setDistrict(e.target.value); setAreaName(''); }}
-              className="w-full px-3 py-2 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-3 py-2.5 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">All districts</option>
               {DISTRICTS.map((d) => (
@@ -207,7 +242,7 @@ export default function ServicesClient({ providers, categories }: ServicesClient
                 onChange={(e) => setAreaName(e.target.value)}
                 disabled={!district}
                 placeholder={district ? 'e.g. Ntinda, Najjera' : 'Select district first'}
-                className="w-full pl-8 pr-3 py-2 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full pl-8 pr-3 py-2.5 text-sm border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-800 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
           </div>

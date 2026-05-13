@@ -2,15 +2,17 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react';
 import type { PropertyFilters as Filters, PropertyType } from '@/types';
 import { DISTRICTS } from '@/lib/constants';
 
-const inputCls = 'w-full px-3 py-2 border border-stone-200 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors';
+const inputCls = 'w-full px-3 py-2.5 border border-stone-200 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-stone-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors';
 const labelCls = 'block text-xs font-medium text-stone-600 dark:text-slate-400 mb-1';
 
 export default function PropertyFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({
     district: searchParams.get('district') ?? '',
@@ -21,6 +23,15 @@ export default function PropertyFilters() {
     property_type: (searchParams.get('property_type') as PropertyType) ?? undefined,
   });
 
+  const activeFilterCount = [
+    filters.district,
+    filters.area_name,
+    filters.min_price,
+    filters.max_price,
+    filters.bedrooms,
+    filters.property_type,
+  ].filter(Boolean).length;
+
   function applyFilters() {
     const params = new URLSearchParams();
     if (filters.district) params.set('district', filters.district);
@@ -30,6 +41,7 @@ export default function PropertyFilters() {
     if (filters.bedrooms) params.set('bedrooms', String(filters.bedrooms));
     if (filters.property_type) params.set('property_type', filters.property_type);
     router.push(`/properties?${params.toString()}`);
+    setIsOpen(false);
   }
 
   function clearFilters() {
@@ -41,10 +53,8 @@ export default function PropertyFilters() {
     setFilters({ ...filters, district: value, area_name: '' });
   }
 
-  return (
-    <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl p-5 space-y-4 transition-colors duration-200">
-      <h3 className="font-semibold text-stone-900 dark:text-white">Filter Properties</h3>
-
+  const filterBody = (
+    <div className="space-y-4 pt-2">
       {/* District */}
       <div>
         <label className={labelCls}>District</label>
@@ -111,13 +121,42 @@ export default function PropertyFilters() {
         </select>
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <button onClick={applyFilters} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
+      <div className="flex gap-2 pt-1">
+        <button onClick={applyFilters} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-3 rounded-xl transition-colors">
           Apply Filters
         </button>
-        <button onClick={clearFilters} className="px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200 border border-stone-200 dark:border-slate-600 rounded-xl transition-colors">
+        <button onClick={clearFilters} className="px-4 py-3 text-sm text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200 border border-stone-200 dark:border-slate-600 rounded-xl transition-colors">
           Clear
         </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl transition-colors duration-200">
+      {/* Header — always visible, toggle on mobile */}
+      <button
+        onClick={() => setIsOpen((v) => !v)}
+        className="w-full flex items-center justify-between p-5 md:cursor-default"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal size={16} className="text-stone-500 dark:text-slate-400" />
+          <h3 className="font-semibold text-stone-900 dark:text-white">Filter Properties</h3>
+          {activeFilterCount > 0 && (
+            <span className="bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full leading-none">
+              {activeFilterCount}
+            </span>
+          )}
+        </div>
+        <span className="md:hidden text-stone-400 dark:text-slate-500">
+          {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </span>
+      </button>
+
+      {/* Body — always visible on desktop, toggled on mobile */}
+      <div className={`px-5 pb-5 ${isOpen ? 'block' : 'hidden md:block'}`}>
+        {filterBody}
       </div>
     </div>
   );

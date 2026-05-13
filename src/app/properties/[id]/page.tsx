@@ -87,8 +87,8 @@ export default async function PropertyDetailPage({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+      <div className="mb-5">
         <PropertyImageGallery
           images={property.property_images ?? []}
           title={property.title}
@@ -96,24 +96,32 @@ export default async function PropertyDetailPage({
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-white">{property.title}</h1>
+        {/* Title + Price row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold text-stone-900 dark:text-white leading-snug">{property.title}</h1>
             <div className="flex items-center gap-1 text-stone-400 dark:text-slate-500 text-sm mt-1">
-              <MapPin size={14} />
-              <span>{property.area_name}, {property.district}</span>
+              <MapPin size={13} />
+              <span className="truncate">{property.area_name}, {property.district}</span>
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-2xl font-bold text-orange-500">{formatUGX(property.price_ugx)}</span>
-            <span className="text-stone-400 dark:text-slate-500 text-sm">{formatPeriod(property.payment_period)}</span>
+          <div className="text-right shrink-0">
+            <p className="text-xl font-bold text-orange-500">{formatUGX(property.price_ugx)}</p>
+            <p className="text-stone-400 dark:text-slate-500 text-xs">{formatPeriod(property.payment_period)}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-stone-600 dark:text-slate-400 flex-wrap">
-          <span className="flex items-center gap-1.5"><Bed size={16} /> {property.bedrooms} Bedroom{property.bedrooms > 1 ? 's' : ''}</span>
-          <span className="flex items-center gap-1.5"><Bath size={16} /> {property.bathrooms} Bathroom{property.bathrooms > 1 ? 's' : ''}</span>
-          <span className="flex items-center gap-1.5 capitalize"><Home size={16} /> {property.property_type}</span>
+        {/* Property details chips */}
+        <div className="flex items-center gap-3 text-sm text-stone-600 dark:text-slate-400 flex-wrap">
+          <span className="flex items-center gap-1.5 bg-stone-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
+            <Bed size={15} /> {property.bedrooms} Bed{property.bedrooms > 1 ? 's' : ''}
+          </span>
+          <span className="flex items-center gap-1.5 bg-stone-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
+            <Bath size={15} /> {property.bathrooms} Bath{property.bathrooms > 1 ? 's' : ''}
+          </span>
+          <span className="flex items-center gap-1.5 bg-stone-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl capitalize">
+            <Home size={15} /> {property.property_type}
+          </span>
         </div>
 
         {property.description && (
@@ -123,7 +131,22 @@ export default async function PropertyDetailPage({
           </div>
         )}
 
+        {/* Desktop WhatsApp button (inline) */}
         {whatsappUrl && (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+          >
+            💬 Contact on WhatsApp
+          </a>
+        )}
+      </div>
+
+      {/* Mobile sticky WhatsApp bar */}
+      {whatsappUrl && (
+        <div className="md:hidden fixed bottom-16 left-0 right-0 z-20 px-4 py-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-stone-100 dark:border-slate-800">
           <a
             href={whatsappUrl}
             target="_blank"
@@ -132,8 +155,8 @@ export default async function PropertyDetailPage({
           >
             💬 Contact on WhatsApp
           </a>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <h2 className="font-semibold text-stone-900 dark:text-white mb-3">Location</h2>

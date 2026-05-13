@@ -50,3 +50,72 @@ h1, h2, h3, h4, h5, h6 {
 .bg-pattern-drift {
   animation: bg-drift 80s linear infinite;
 }
+
+/* Prevent map canvas from triggering page scroll on touch */
+.mapboxgl-canvas {
+  touch-action: none;
+}
+
+/* Clean, card-style popups */
+.mapboxgl-popup-content {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14) !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  overflow: hidden;
+}
+
+.mapboxgl-popup-close-button {
+  font-size: 16px !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  top: 6px !important;
+  right: 6px !important;
+  color: #78716c !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+  background: rgba(0,0,0,0.06) !important;
+  color: #1c1917 !important;
+}
+
+/* Hide popup tip/arrow */
+.mapboxgl-popup-tip {
+  display: none !important;
+}
+
+/* Larger, touch-friendly map control buttons */
+.mapboxgl-ctrl-group button {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.mapboxgl-ctrl button .mapboxgl-ctrl-icon {
+  background-size: 20px 20px !important;
+}
+
+/* Compact attribution on mobile */
+@media (max-width: 768px) {
+  .mapboxgl-ctrl-attrib {
+    font-size: 10px !important;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure tap highlight is suppressed on interactive elements */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}

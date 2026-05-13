@@ -3,6 +3,7 @@ import { Poppins, Nunito } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import BottomNav from "@/components/layout/BottomNav";
 import BackgroundPattern from "@/components/layout/BackgroundPattern";
 
 const poppins = Poppins({
@@ -72,8 +73,11 @@ export default function RootLayout({
       >
         <BackgroundPattern />
         <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <main className="flex-1 pb-16 md:pb-0">{children}</main>
+        <div className="hidden md:block">
+          <Footer />
+        </div>
+        <BottomNav />
       </body>
     </html>
   );

@@ -79,9 +79,9 @@ export default async function PropertiesPage({
   const params = await searchParams;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-white mb-6">Browse Properties</h1>
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-xl md:text-2xl font-bold text-stone-900 dark:text-white mb-4 md:mb-6">Browse Properties</h1>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         <aside className="w-full md:w-72 shrink-0">
           <Suspense fallback={null}>
             <PropertyFilters />

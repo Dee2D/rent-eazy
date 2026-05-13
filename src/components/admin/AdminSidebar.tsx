@@ -87,10 +87,10 @@ export default function AdminSidebar() {
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-30 flex">
-          <aside className="w-64 bg-stone-900 text-white flex flex-col pt-14">
+          <aside className="w-72 max-w-[80vw] bg-stone-900 text-white flex flex-col pt-14 shadow-2xl">
             {navContent}
           </aside>
-          <div className="flex-1 bg-black/40" onClick={() => setMobileOpen(false)} />
+          <div className="flex-1 bg-black/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
         </div>
       )}
     </>

@@ -77,7 +77,7 @@ export default function IntroCarousel({ stats }: IntroCarouselProps) {
       onMouseLeave={() => setPaused(false)}
     >
       {/* Brand header */}
-      <div className="shrink-0 px-8 pt-7 pb-3">
+      <div className="shrink-0 px-4 md:px-8 pt-5 md:pt-7 pb-3">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,7 +105,7 @@ export default function IntroCarousel({ stats }: IntroCarouselProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="shrink-0 mx-8 mb-4 mt-1 grid grid-cols-2 gap-3"
+        className="shrink-0 mx-4 md:mx-8 mb-3 mt-1 grid grid-cols-2 gap-3"
       >
         <Link
           href="/properties"
@@ -129,7 +129,7 @@ export default function IntroCarousel({ stats }: IntroCarouselProps) {
       </motion.div>
 
       {/* Dot indicators + arrows */}
-      <div className="shrink-0 px-8 pb-7 flex items-center justify-between">
+      <div className="shrink-0 px-4 md:px-8 pb-5 md:pb-7 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {SLIDES.map((_, i) => (
             <button
