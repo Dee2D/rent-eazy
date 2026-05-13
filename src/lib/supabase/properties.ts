@@ -40,6 +40,8 @@ export async function getPropertyById(id: string): Promise<Property | null> {
     .from('properties')
     .select('*, property_images(*), profiles(full_name, phone_number)')
     .eq('id', id)
+    .eq('is_active', true)
+    .gt('expires_at', new Date().toISOString())
     .single();
 
   if (error) return null;

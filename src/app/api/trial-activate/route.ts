@@ -33,6 +33,18 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === 'listing') {
+      // Idempotency: skip if already active
+      const { data: existing } = await supabase
+        .from('properties')
+        .select('is_active, expires_at')
+        .eq('id', referenceId)
+        .eq('landlord_id', userId)
+        .single();
+
+      if (existing?.is_active && existing.expires_at && new Date(existing.expires_at) > new Date()) {
+        return NextResponse.json({ success: true });
+      }
+
       const expiresAt = trial.endDate ?? new Date(Date.now() + 90 * 86400000);
 
       const { error } = await supabase
@@ -44,6 +56,19 @@ export async function POST(request: NextRequest) {
       if (error) throw new Error(error.message);
 
     } else if (type === 'subscription') {
+      // Idempotency: skip if an active subscription already exists for this provider
+      const { data: existingSub } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('provider_id', referenceId)
+        .eq('is_active', true)
+        .gt('end_date', new Date().toISOString())
+        .maybeSingle();
+
+      if (existingSub) {
+        return NextResponse.json({ success: true });
+      }
+
       const trialEnd = trial.endDate ?? new Date(Date.now() + 90 * 86400000);
 
       const { error: subError } = await supabase

@@ -7,6 +7,7 @@ import {
 } from '@/lib/supabase/providers';
 import { slugToCategory, categoryToSlug, slugifyText, areaSlugToName } from '@/lib/utils';
 
+export const revalidate = 300;
 export const dynamicParams = true;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://renteazy.com';

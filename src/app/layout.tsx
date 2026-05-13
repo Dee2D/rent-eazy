@@ -20,7 +20,7 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://renteazy.com';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://rent-eazy.vercel.app';
 
 export const metadata: Metadata = {
   title: {

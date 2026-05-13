@@ -58,6 +58,17 @@ export async function POST(request: NextRequest) {
       .eq('id', payment.id);
 
     if (type === 'listing') {
+      // Idempotency: skip if already active and not yet expired
+      const { data: existingProp } = await supabase
+        .from('properties')
+        .select('is_active, expires_at')
+        .eq('id', referenceId)
+        .single();
+
+      if (existingProp?.is_active && existingProp.expires_at && new Date(existingProp.expires_at) > new Date()) {
+        return NextResponse.json({ success: true, paymentId: payment.id, message: 'Already active' });
+      }
+
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 3);
 
@@ -69,6 +80,19 @@ export async function POST(request: NextRequest) {
       if (propError) throw new Error(propError.message);
 
     } else if (type === 'subscription') {
+      // Idempotency: skip if active subscription already exists
+      const { data: existingSub } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('provider_id', referenceId)
+        .eq('is_active', true)
+        .gt('end_date', new Date().toISOString())
+        .maybeSingle();
+
+      if (existingSub) {
+        return NextResponse.json({ success: true, paymentId: payment.id, message: 'Already subscribed' });
+      }
+
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 30);
 

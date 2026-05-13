@@ -3,7 +3,7 @@ import { getActiveProperties } from '@/lib/supabase/properties';
 import { getAllProvidersForSitemap, getDistinctCategoryAreaCombos } from '@/lib/supabase/providers';
 import { categoryToSlug, slugifyText } from '@/lib/utils';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://renteazy.com';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://rent-eazy.vercel.app';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

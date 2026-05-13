@@ -2,6 +2,8 @@ import { getVisibleProviders, getServiceCategories } from '@/lib/supabase/provid
 import type { ServiceProvider, ServiceCategory } from '@/types';
 import ServicesClient from './ServicesClient';
 
+export const revalidate = 300; // revalidate every 5 minutes
+
 export const metadata = { title: 'Services — Rent Eazy' };
 
 export default async function ServicesPage() {

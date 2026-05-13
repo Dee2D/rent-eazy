@@ -6,6 +6,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { getFilteredProperties } from '@/lib/supabase/properties';
 import type { PropertyFilters as Filters, PropertyType } from '@/types';
 
+export const revalidate = 300; // revalidate every 5 minutes
+
 export const metadata: Metadata = {
   title: 'Browse Properties — Rent Eazy',
   description: 'Find rental apartments, houses, and bedsitters across Uganda. Filter by district, price, and bedrooms on Rent Eazy.',
