@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+
+export const revalidate = 300;
 import Link from 'next/link';
 import { Bed, Bath, MapPin, Home, Phone } from 'lucide-react';
 import { getPropertyById } from '@/lib/supabase/properties';
