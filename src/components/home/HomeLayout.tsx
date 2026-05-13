@@ -14,25 +14,34 @@ export default function HomeLayout({ carousel, map }: HomeLayoutProps) {
 
   return (
     <div className="relative flex flex-col md:flex-row h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4rem)] overflow-hidden">
-      {/* Carousel panel — full height on mobile when active */}
+
+      {/* ── Carousel panel ── */}
+      {/* Mobile: flex-1 fills full height when active; hidden when on map tab  */}
+      {/* Desktop: fixed 40% width, always visible                              */}
       <div
-        className={`w-full md:w-[40%] shrink-0 overflow-hidden md:border-r border-stone-100 dark:border-slate-800 md:shadow-lg md:z-10 ${
-          mobileView === 'discover' ? 'flex' : 'hidden md:flex'
-        } flex-col`}
+        className={`
+          flex-col overflow-hidden
+          md:flex md:flex-none md:w-[40%] md:border-r md:border-stone-100 md:dark:border-slate-800 md:shadow-lg md:z-10
+          ${mobileView === 'discover' ? 'flex flex-1' : 'hidden'}
+        `}
       >
         {carousel}
       </div>
 
-      {/* Map panel — full height on mobile when active */}
+      {/* ── Map panel ── */}
+      {/* Mobile: flex-1 fills full height when active; hidden on discover tab  */}
+      {/* Desktop: flex-1 fills remaining space, always visible                  */}
       <div
-        className={`w-full md:flex-1 relative ${
-          mobileView === 'map' ? 'flex' : 'hidden md:flex'
-        } flex-col`}
+        className={`
+          flex-col relative
+          md:flex md:flex-1
+          ${mobileView === 'map' ? 'flex flex-1' : 'hidden'}
+        `}
       >
         {map}
       </div>
 
-      {/* Mobile view toggle — floating pill above bottom nav */}
+      {/* ── Mobile toggle pill ── */}
       <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex bg-white dark:bg-slate-800 rounded-full shadow-lg border border-stone-100 dark:border-slate-700 p-1 gap-1">
         <button
           onClick={() => setMobileView('discover')}
