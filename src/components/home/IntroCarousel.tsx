@@ -17,7 +17,7 @@ const SLIDES: SlideData[] = [
   },
   {
     id: 2,
-    headline: 'Find a Home in Kampala',
+    headline: 'Find a Home',
     text: 'Search by location, explore on the map, and discover homes that fit your lifestyle.',
     imageUrl: '/images/slides/slide-bungalow.jpeg',
     imageAlt: 'Ugandan starter bungalow with car and green lawn',
@@ -26,7 +26,7 @@ const SLIDES: SlideData[] = [
   },
   {
     id: 3,
-    headline: 'List Your Uganda Property',
+    headline: 'List Your Property',
     text: 'Reach the right tenants faster and manage your listings effortlessly.',
     imageUrl: '/images/slides/slide-kyanja.jpeg',
     imageAlt: '6-bedroom house for sale in Kyanja, Kampala',
