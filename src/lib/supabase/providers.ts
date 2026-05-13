@@ -1,9 +1,9 @@
-import { createClient } from './server';
+import { createClient, createPublicClient } from './server';
 import type { ServiceProvider, ServiceCategory } from '@/types';
 import { slugifyText } from '@/lib/utils';
 
 export async function getVisibleProviders(filters?: { district?: string; area_name?: string; category?: string }): Promise<ServiceProvider[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   let query = supabase
     .from('service_providers')
     .select('*, profiles(full_name, phone_number), service_categories(name)')
@@ -18,7 +18,7 @@ export async function getVisibleProviders(filters?: { district?: string; area_na
 }
 
 export async function getServiceCategories(): Promise<ServiceCategory[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_categories')
     .select('*')
@@ -56,7 +56,7 @@ export async function getProviderByProfileId(profileId: string): Promise<Service
 }
 
 export async function getProviderBySlug(slug: string): Promise<ServiceProvider | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_providers')
     .select('*, profiles(full_name, phone_number), service_categories(name)')
@@ -73,7 +73,7 @@ export async function getProvidersByCategoryAndArea(
   areaSlug: string,
   limit = 20
 ): Promise<ServiceProvider[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const areaSearch = areaSlug.replace(/-/g, ' ');
 
   const { data: catData } = await supabase
@@ -102,7 +102,7 @@ export async function getRelatedProviders(
   district: string,
   limit = 3
 ): Promise<ServiceProvider[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_providers')
     .select('*, profiles(full_name, phone_number), service_categories(name)')
@@ -121,7 +121,7 @@ export async function getProvidersNearProperty(
   areaName: string,
   limit = 4
 ): Promise<ServiceProvider[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_providers')
     .select('*, profiles(full_name, phone_number), service_categories(name)')
@@ -134,7 +134,7 @@ export async function getProvidersNearProperty(
 }
 
 export async function getAllProvidersForSitemap(): Promise<{ slug: string }[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_providers')
     .select('slug')
@@ -148,7 +148,7 @@ export async function getAllProvidersForSitemap(): Promise<{ slug: string }[]> {
 export async function getDistinctCategoryAreaCombos(): Promise<
   { category: string; area_name: string; district: string }[]
 > {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('service_providers')
     .select('area_name, district, service_categories(name)')

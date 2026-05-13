@@ -1,8 +1,8 @@
-import { createClient } from './server';
+import { createClient, createPublicClient } from './server';
 import type { Property, PropertyFilters } from '@/types';
 
 export async function getActiveProperties(): Promise<Property[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('properties')
     .select('*, property_images(*), profiles(full_name, phone_number)')
@@ -15,7 +15,7 @@ export async function getActiveProperties(): Promise<Property[]> {
 }
 
 export async function getFilteredProperties(filters: PropertyFilters): Promise<Property[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   let query = supabase
     .from('properties')
     .select('*, property_images(*), profiles(full_name, phone_number)')
@@ -35,7 +35,7 @@ export async function getFilteredProperties(filters: PropertyFilters): Promise<P
 }
 
 export async function getPropertyById(id: string): Promise<Property | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('properties')
     .select('*, property_images(*), profiles(full_name, phone_number)')
