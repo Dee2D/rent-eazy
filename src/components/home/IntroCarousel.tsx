@@ -38,7 +38,7 @@ const SLIDES: SlideData[] = [
     headline: 'Everything You Need, Right Where You Live',
     text: 'From plumbers to cleaners, find trusted service providers near your home.',
     imageUrl: '/images/slides/slide-services.jpeg',
-    imageAlt: 'Professional service provider in Kampala, Uganda',
+    imageAlt: 'Professional plumber available for hire in Uganda',
     cta: { label: 'Find Services', href: '/services' },
     accent: 'bg-purple-500',
   },
