@@ -12,11 +12,12 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createServiceRoleClient();
   const startedAt = new Date().toISOString();
+  const backupType = req.nextUrl.searchParams.get('type') === 'weekly' ? 'weekly' : 'daily';
 
   // Insert a pending backup record and capture its ID
   const { data: backupRow, error: insertError } = await supabase
     .from('system_backups')
-    .insert({ backup_type: 'daily', status: 'running', started_at: startedAt })
+    .insert({ backup_type: backupType, status: 'running', started_at: startedAt })
     .select('id')
     .single();
 

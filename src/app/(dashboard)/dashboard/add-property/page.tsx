@@ -157,6 +157,32 @@ function AddPropertyForm() {
         area_name: sanitizeText(form.area_name, 100),
       };
 
+      // Fraud check on new listings only (not edits)
+      if (!isEditing) {
+        try {
+          const fraudRes = await fetch('/api/fraud/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: sanitizedForm.title,
+              description: sanitizedForm.description,
+              priceUGX: sanitizedForm.price_ugx,
+              district: sanitizedForm.district,
+            }),
+          });
+          if (fraudRes.ok) {
+            const signal = await fraudRes.json();
+            if (signal.action === 'reject') {
+              setError('Your listing could not be submitted. Please review your content — avoid urgency language, phone numbers in the description, or pricing that seems unusual.');
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {
+          // Non-fatal — proceed if fraud check is unavailable
+        }
+      }
+
       if (isEditing) {
         const { error: updateError } = await supabase
           .from('properties')
