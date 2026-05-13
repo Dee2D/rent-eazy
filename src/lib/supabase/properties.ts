@@ -120,6 +120,20 @@ export async function getLandlordProperties(landlordId: string): Promise<Propert
   return (data as Property[]) ?? [];
 }
 
+export async function getSimilarProperties(district: string, excludeId: string, limit = 3): Promise<Property[]> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from('properties')
+    .select('*, property_images(*)')
+    .eq('is_active', true)
+    .gt('expires_at', new Date().toISOString())
+    .eq('district', district)
+    .neq('id', excludeId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return (data as Property[]) ?? [];
+}
+
 export async function getAllPropertiesForSitemap(): Promise<{ id: string }[]> {
   const supabase = createPublicClient();
   const { data } = await supabase

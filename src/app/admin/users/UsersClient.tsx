@@ -47,6 +47,18 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
     startTransition(() => router.refresh());
   }
 
+  async function banUser(id: string) {
+    if (!confirm('Ban this user? All their listings will be deactivated immediately.')) return;
+    setActionId(id);
+    await fetch(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ban' }),
+    });
+    setActionId(null);
+    startTransition(() => router.refresh());
+  }
+
   return (
     <div className="space-y-4">
       <input
@@ -124,6 +136,15 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                         >
                           {u.role === 'deactivated' ? 'Reactivate' : 'Deactivate'}
                         </button>
+                        {u.role !== 'deactivated' && u.role !== 'admin' && (
+                          <button
+                            disabled={busy}
+                            onClick={() => banUser(u.id)}
+                            className="text-xs px-2.5 py-1.5 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-40 transition-colors"
+                          >
+                            Ban
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

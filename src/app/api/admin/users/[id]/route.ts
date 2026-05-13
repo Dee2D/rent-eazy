@@ -14,7 +14,7 @@ export async function PATCH(
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   const { id } = await params;
-  const body = await request.json() as { action: 'change_role' | 'deactivate' | 'reactivate'; role?: UserRole };
+  const body = await request.json() as { action: 'change_role' | 'deactivate' | 'reactivate' | 'ban'; role?: UserRole };
   const supabase = await createServiceRoleClient();
 
   if (body.action === 'change_role') {
@@ -47,6 +47,15 @@ export async function PATCH(
       .eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     await writeAuditLog('user.reactivated', 'profile', id, admin.id);
+  }
+
+  if (body.action === 'ban') {
+    // Deactivate profile AND pull all their listings immediately
+    await Promise.all([
+      supabase.from('profiles').update({ role: 'deactivated' as UserRole }).eq('id', id),
+      supabase.from('properties').update({ is_active: false }).eq('landlord_id', id),
+    ]);
+    await writeAuditLog('user.banned', 'profile', id, admin.id);
   }
 
   return NextResponse.json({ success: true });

@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 }
 import Link from 'next/link';
 import { Bed, Bath, MapPin, Home, Phone } from 'lucide-react';
-import { getPropertyById } from '@/lib/supabase/properties';
+import { getPropertyById, getSimilarProperties } from '@/lib/supabase/properties';
 import { getProvidersNearProperty } from '@/lib/supabase/providers';
 import { formatUGX, formatPeriod } from '@/lib/utils';
 import type { MapMarker } from '@/types';
@@ -84,10 +84,15 @@ export default async function PropertyDetailPage({
   if (!property) notFound();
 
   let nearbyProviders: Awaited<ReturnType<typeof getProvidersNearProperty>> = [];
+  let similarProperties: Awaited<ReturnType<typeof getSimilarProperties>> = [];
   try {
-    nearbyProviders = await getProvidersNearProperty(property.district, property.area_name, 4);
+    [nearbyProviders, similarProperties] = await Promise.all([
+      getProvidersNearProperty(property.district, property.area_name, 4),
+      getSimilarProperties(property.district, property.id, 3),
+    ]);
   } catch {
     nearbyProviders = [];
+    similarProperties = [];
   }
 
   const whatsappUrl = property.profiles?.phone_number
@@ -283,6 +288,48 @@ export default async function PropertyDetailPage({
                     )}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Similar properties in the same district */}
+      {similarProperties.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-stone-900 dark:text-white">
+              More in {property.district}
+            </h2>
+            <Link href={`/properties?district=${encodeURIComponent(property.district)}`} className="text-sm text-orange-500 hover:underline">
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {similarProperties.map((sim) => {
+              const img = sim.property_images?.[0]?.image_url;
+              return (
+                <Link
+                  key={sim.id}
+                  href={`/properties/${sim.id}`}
+                  className="bg-white dark:bg-slate-800 rounded-2xl border border-stone-100 dark:border-slate-700 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="relative h-32 bg-orange-50 dark:bg-slate-700">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={img} alt={sim.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-4xl">🏠</div>
+                    )}
+                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-semibold px-2 py-0.5 rounded-lg capitalize">
+                      {sim.property_type}
+                    </span>
+                  </div>
+                  <div className="p-3">
+                    <p className="font-medium text-stone-900 dark:text-white text-sm truncate">{sim.title}</p>
+                    <p className="text-orange-500 font-bold text-sm mt-0.5">{formatUGX(sim.price_ugx)}<span className="text-stone-400 dark:text-slate-500 font-normal text-xs">{formatPeriod(sim.payment_period)}</span></p>
+                  </div>
+                </Link>
               );
             })}
           </div>
