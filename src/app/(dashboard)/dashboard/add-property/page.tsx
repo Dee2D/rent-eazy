@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { PropertyType, PaymentPeriod, ListingType } from '@/types';
 import { DISTRICTS, LISTING_FEE, MIN_IMAGES } from '@/lib/constants';
 import { checkTrialStatus } from '@/lib/supabase/trial';
+import { sanitizeText, isValidUgandaCoords } from '@/lib/security';
 
 const STEPS = ['Basic Info', 'Location', 'Photos', 'Pricing'];
 
@@ -93,6 +94,10 @@ function AddPropertyForm() {
   function validateStep2() {
     if (!form.area_name.trim()) { setError('Area / neighbourhood is required'); return false; }
     if (form.latitude === 0 || form.longitude === 0) { setError('Please set a location on the map'); return false; }
+    if (!isValidUgandaCoords(form.latitude, form.longitude)) {
+      setError('Location must be within Uganda. Please pin your property on the map.');
+      return false;
+    }
     return true;
   }
 
@@ -110,8 +115,9 @@ function AddPropertyForm() {
     const urls: string[] = [];
 
     for (const file of images) {
-      const ext = file.name.split('.').pop() ?? 'jpg';
-      const path = `${userId}/${propertyId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      // Cryptographically random filename — prevents enumeration and path traversal
+      const path = `${userId}/${propertyId}/${crypto.randomUUID()}.${ext}`;
       const { data, error: uploadError } = await supabase.storage
         .from('property-images')
         .upload(path, file, { upsert: true });
@@ -143,10 +149,18 @@ function AddPropertyForm() {
     try {
       const supabase = createClient();
 
+      // Sanitize all user-supplied text before touching the database
+      const sanitizedForm = {
+        ...form,
+        title: sanitizeText(form.title, 200),
+        description: form.description ? sanitizeText(form.description, 2000) : '',
+        area_name: sanitizeText(form.area_name, 100),
+      };
+
       if (isEditing) {
         const { error: updateError } = await supabase
           .from('properties')
-          .update({ ...form })
+          .update({ ...sanitizedForm })
           .eq('id', editId)
           .eq('landlord_id', user.id);
 
@@ -169,7 +183,7 @@ function AddPropertyForm() {
         const { data: property, error: propError } = await supabase
           .from('properties')
           .insert({
-            ...form,
+            ...sanitizedForm,
             landlord_id: user.id,
             is_active: false,
           })

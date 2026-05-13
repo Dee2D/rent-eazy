@@ -1,10 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+
+// Friendly messages that don't leak whether an account exists
+const AUTH_ERROR_MAP: Record<string, string> = {
+  'Invalid login credentials': 'Incorrect email or password.',
+  'Email not confirmed': 'Please confirm your email before signing in. Check your inbox.',
+  'Too many requests': 'Too many sign-in attempts. Please wait a few minutes and try again.',
+  'User not found': 'Incorrect email or password.',
+};
+
+function normalizeAuthError(msg: string): string {
+  for (const [key, friendly] of Object.entries(AUTH_ERROR_MAP)) {
+    if (msg.includes(key)) return friendly;
+  }
+  return 'Sign-in failed. Please check your credentials and try again.';
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,27 +29,40 @@ export default function LoginPage() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
 
+  // Client-side cooldown — prevents rapid repeated submissions
+  const lastAttemptRef = useRef(0);
+  const COOLDOWN_MS = 2000;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    const now = Date.now();
+    if (now - lastAttemptRef.current < COOLDOWN_MS) return;
+    lastAttemptRef.current = now;
+
     setLoading(true);
     setError(null);
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
 
-    if (error) {
-      setError(error.message);
+    if (authError) {
+      setError(normalizeAuthError(authError.message));
       setLoading(false);
-    } else {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      router.refresh();
-      router.push(profile?.role === 'admin' ? '/admin' : '/dashboard');
+      return;
     }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    router.refresh();
+    router.push(profile?.role === 'admin' ? '/admin' : '/dashboard');
   }
 
   const inputCls =
@@ -61,29 +89,33 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-3 mb-6 text-sm">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl p-3 mb-6 text-sm" role="alert">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-slate-200 mb-1">
+            <label className="block text-sm font-medium text-stone-700 dark:text-slate-200 mb-1" htmlFor="email">
               Email
             </label>
             <input
+              id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={inputCls}
               placeholder="you@example.com"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
             />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-sm font-medium text-stone-700 dark:text-slate-200">
+              <label className="text-sm font-medium text-stone-700 dark:text-slate-200" htmlFor="password">
                 Password
               </label>
               <Link
@@ -95,12 +127,14 @@ export default function LoginPage() {
             </div>
             <div className="relative">
               <input
+                id="password"
                 type={showPw ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`${inputCls} pr-11`}
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
               <button
                 type="button"

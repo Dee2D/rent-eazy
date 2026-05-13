@@ -67,7 +67,9 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      return NextResponse.redirect(`${origin}${next}`);
+      // Validate next is a safe relative path — prevent open redirect via //evil.com
+      const safeNext = /^\/[^/]/.test(next) ? next : '/dashboard';
+      return NextResponse.redirect(`${origin}${safeNext}`);
     }
   }
 

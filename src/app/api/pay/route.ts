@@ -2,12 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient, createClient } from '@/lib/supabase/server';
 import { verifyMobileMoneyPayment } from '@/lib/payments';
 import { generatePaymentReference } from '@/lib/utils';
-import { checkRateLimit, getClientIp, isValidUUID } from '@/lib/security';
+import { checkRateLimit, getClientIp, isValidUUID, isValidUgandaPhone } from '@/lib/security';
 import { writeAuditLog } from '@/lib/audit';
 import { LISTING_FEE, SUBSCRIPTION_FEE } from '@/lib/constants';
 import type { PaymentType, MobileMoneyProvider } from '@/types';
 
 export async function POST(request: NextRequest) {
+  // CSRF: verify request comes from our own origin
+  const requestOrigin = request.headers.get('origin');
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
+  if (requestOrigin && appUrl && requestOrigin !== appUrl && !requestOrigin.startsWith('http://localhost')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   // Rate limit: 5 payment attempts per IP per 10 minutes
   const ip = getClientIp(request.headers);
   const rl = checkRateLimit(`pay:${ip}`, 5, 10 * 60 * 1000);
@@ -45,6 +52,9 @@ export async function POST(request: NextRequest) {
   }
   if (!['mtn', 'airtel'].includes(provider)) {
     return NextResponse.json({ error: 'Invalid payment provider' }, { status: 400 });
+  }
+  if (phoneNumber && !isValidUgandaPhone(phoneNumber)) {
+    return NextResponse.json({ error: 'Enter a valid Uganda phone number (e.g. 0701234567)' }, { status: 400 });
   }
   if (!isValidUUID(referenceId)) {
     return NextResponse.json({ error: 'Invalid referenceId format' }, { status: 400 });

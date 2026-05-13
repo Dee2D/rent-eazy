@@ -210,6 +210,9 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               className={inputCls}
               placeholder="you@example.com"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
             />
           </div>
 
@@ -237,11 +240,12 @@ export default function RegisterPage() {
               <input
                 type={showPw ? 'text' : 'password'}
                 required
-                minLength={6}
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`${inputCls} pr-11`}
                 placeholder="••••••••"
+                autoComplete="new-password"
               />
               <button
                 type="button"
@@ -277,11 +281,12 @@ export default function RegisterPage() {
               <input
                 type={showConfirm ? 'text' : 'password'}
                 required
-                minLength={6}
+                minLength={8}
                 value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)}
                 className={`${inputCls} pr-11 ${!passwordsMatch ? 'ring-2 ring-red-400 border-red-300' : ''}`}
                 placeholder="••••••••"
+                autoComplete="new-password"
               />
               <button
                 type="button"

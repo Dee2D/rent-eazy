@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -10,9 +10,11 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading]   = useState(false);
   const [sent, setSent]         = useState(false);
   const [error, setError]       = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (cooldown > 0) return;
     setLoading(true);
     setError(null);
 
@@ -21,13 +23,25 @@ export default function ForgotPasswordPage() {
       redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
+    // Always show the success screen regardless of whether the email exists
+    // (prevents email enumeration)
+    if (error && !error.message.includes('rate')) {
+      setSent(true); // don't reveal if email exists or not
+    } else if (error) {
+      setError('Too many requests. Please wait before trying again.');
     } else {
       setSent(true);
-      setLoading(false);
     }
+    setLoading(false);
+
+    // 60-second cooldown to prevent reset email spam
+    setCooldown(60);
+    const interval = setInterval(() => {
+      setCooldown((c) => {
+        if (c <= 1) { clearInterval(interval); return 0; }
+        return c - 1;
+      });
+    }, 1000);
   }
 
   const inputCls =
@@ -99,15 +113,18 @@ export default function ForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
               className={inputCls}
               placeholder="you@example.com"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
             />
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || cooldown > 0}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
           >
-            {loading ? 'Sending…' : 'Send Reset Link'}
+            {loading ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Send Reset Link'}
           </button>
         </form>
 

@@ -41,13 +41,28 @@ export function isValidUUID(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
+/**
+ * Validate coordinates are within Uganda's bounding box.
+ * Lat: -1.5° to 4.25°N, Lng: 29.5° to 35.1°E
+ */
+export function isValidUgandaCoords(lat: number, lng: number): boolean {
+  return lat >= -1.5 && lat <= 4.25 && lng >= 29.5 && lng <= 35.1;
+}
+
+/** Validate a Uganda phone number (MTN or Airtel format). */
+export function isValidUgandaPhone(phone: string): boolean {
+  const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+  return /^(256[0-9]{9}|0[0-9]{9})$/.test(digits);
+}
+
 /** Security headers added to every response via middleware. */
 export const SECURITY_HEADERS: Record<string, string> = {
-  'X-Frame-Options':        'DENY',
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy':        'strict-origin-when-cross-origin',
-  'Permissions-Policy':     'camera=(), microphone=(), geolocation=(self)',
-  'X-DNS-Prefetch-Control': 'on',
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Frame-Options':           'DENY',
+  'X-Content-Type-Options':    'nosniff',
+  'Referrer-Policy':           'strict-origin-when-cross-origin',
+  'Permissions-Policy':        'camera=(), microphone=(), geolocation=(self)',
+  'X-DNS-Prefetch-Control':    'on',
   'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com",

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { ServiceProvider, ServiceCategory, Subscription } from '@/types';
 import { DISTRICTS, SUBSCRIPTION_FEE } from '@/lib/constants';
 import { checkTrialStatus } from '@/lib/supabase/trial';
+import { sanitizeText, isValidUgandaCoords } from '@/lib/security';
 
 interface Props {
   userId: string;
@@ -43,10 +44,20 @@ export default function ProviderClient({ userId, phoneNumber, existingProvider, 
     setLoading(true);
     setError(null);
     try {
+      if (!isValidUgandaCoords(form.latitude, form.longitude)) {
+        setError('Location must be within Uganda. Please enter valid coordinates.');
+        setLoading(false);
+        return;
+      }
+      const sanitizedForm = {
+        ...form,
+        description: form.description ? sanitizeText(form.description, 2000) : '',
+        area_name: sanitizeText(form.area_name, 100),
+      };
       const supabase = createClient();
       const { data, error: dbErr } = await supabase
         .from('service_providers')
-        .insert({ ...form, profile_id: userId, is_visible: false })
+        .insert({ ...sanitizedForm, profile_id: userId, is_visible: false })
         .select('*, service_categories(name)')
         .single();
       if (dbErr) throw new Error(dbErr.message);

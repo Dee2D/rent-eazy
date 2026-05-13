@@ -12,8 +12,9 @@ interface PaymentModalProps {
   amount: number;
   type: 'listing' | 'subscription';
   referenceId: string;
-  userId: string;
   phoneNumber?: string;
+  // userId kept in props for backward compatibility but NOT sent to server
+  userId?: string;
 }
 
 export default function PaymentModal({
@@ -23,7 +24,6 @@ export default function PaymentModal({
   amount,
   type,
   referenceId,
-  userId,
   phoneNumber = '',
 }: PaymentModalProps) {
   const [phone, setPhone] = useState(phoneNumber);
@@ -46,10 +46,12 @@ export default function PaymentModal({
     setError(null);
 
     try {
+      // userId and amount are intentionally NOT sent — the server derives them
+      // from the session and constants respectively to prevent client-side spoofing.
       const res = await fetch('/api/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, amount, type, referenceId, phoneNumber: phone }),
+        body: JSON.stringify({ type, referenceId, phoneNumber: phone, provider }),
       });
 
       const data = await res.json();
@@ -63,7 +65,7 @@ export default function PaymentModal({
         onClose();
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment failed');
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
       setLoading(false);
     }
   }
@@ -123,6 +125,7 @@ export default function PaymentModal({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+256 700 000000"
+              autoComplete="tel"
               className="w-full px-4 py-3 border border-stone-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm placeholder:text-stone-400 dark:placeholder:text-slate-500"
             />
           </div>
