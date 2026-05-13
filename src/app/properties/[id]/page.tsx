@@ -2,6 +2,18 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 300;
+export const dynamicParams = true; // on-demand render unknown IDs, then cache
+
+export async function generateStaticParams() {
+  const { createPublicClient } = await import('@/lib/supabase/server');
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from('properties')
+    .select('id')
+    .eq('is_active', true)
+    .gt('expires_at', new Date().toISOString());
+  return (data ?? []).map((p: { id: string }) => ({ id: p.id }));
+}
 import Link from 'next/link';
 import { Bed, Bath, MapPin, Home, Phone } from 'lucide-react';
 import { getPropertyById } from '@/lib/supabase/properties';
