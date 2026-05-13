@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Heart } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Heart, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
@@ -61,6 +61,13 @@ export default function Navbar() {
                   >
                     <Heart size={14} /> Saved Properties
                   </Link>
+                  <Link
+                    href="/dashboard/inquiries"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-slate-700 hover:text-orange-600 dark:hover:text-orange-400"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <MessageCircle size={14} /> Inquiries
+                  </Link>
                   <button
                     onClick={() => { signOut(); setDropdownOpen(false); }}
                     className="flex items-center gap-2 w-full px-4 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
@@ -101,6 +108,12 @@ export default function Navbar() {
           {user ? (
             <>
               <Link href="/dashboard" className="text-stone-700 dark:text-slate-200 font-medium" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <Link href="/dashboard/saved" className="text-stone-700 dark:text-slate-200 font-medium flex items-center gap-1.5" onClick={() => setMenuOpen(false)}>
+                <Heart size={14} className="text-orange-500" /> Saved Properties
+              </Link>
+              <Link href="/dashboard/inquiries" className="text-stone-700 dark:text-slate-200 font-medium flex items-center gap-1.5" onClick={() => setMenuOpen(false)}>
+                <MessageCircle size={14} className="text-orange-500" /> Inquiries
+              </Link>
               <button onClick={() => { signOut(); setMenuOpen(false); }} className="text-left text-red-500 font-medium">Sign Out</button>
             </>
           ) : (

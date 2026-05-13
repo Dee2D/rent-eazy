@@ -25,6 +25,10 @@ export default async function DashboardPage() {
 
   const activeListings = properties.filter((p) => p.is_active).length;
   const totalViews = properties.reduce((sum, p) => sum + (p.view_count ?? 0), 0);
+  const topProperties = [...properties]
+    .filter((p) => (p.view_count ?? 0) > 0)
+    .sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0))
+    .slice(0, 3);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -50,8 +54,29 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* Top properties by views */}
+      {topProperties.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm mb-6">
+          <p className="text-xs text-stone-400 dark:text-slate-500 font-medium uppercase tracking-wide mb-3">Top Listings by Views</p>
+          <div className="space-y-2">
+            {topProperties.map((p, i) => (
+              <div key={p.id} className="flex items-center gap-3">
+                <span className="text-xs font-bold text-stone-400 dark:text-slate-500 w-4">{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-stone-800 dark:text-slate-100 truncate">{p.title}</p>
+                  <p className="text-xs text-stone-400 dark:text-slate-500">{p.district}</p>
+                </div>
+                <span className="text-xs font-semibold text-orange-500 shrink-0">
+                  👁 {(p.view_count ?? 0).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Link
           href="/dashboard/add-property"
           className="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl p-5 shadow-sm transition-colors"
@@ -67,6 +92,14 @@ export default async function DashboardPage() {
           <p className="text-2xl mb-2">🏘️</p>
           <p className="font-semibold text-stone-900 dark:text-white">My Properties</p>
           <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">{properties.length} total</p>
+        </Link>
+        <Link
+          href="/dashboard/inquiries"
+          className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-500 rounded-2xl p-5 shadow-sm transition-colors"
+        >
+          <p className="text-2xl mb-2">💬</p>
+          <p className="font-semibold text-stone-900 dark:text-white">Inquiries</p>
+          <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">Messages from tenants</p>
         </Link>
         <Link
           href="/dashboard/provider"

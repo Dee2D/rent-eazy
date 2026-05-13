@@ -25,6 +25,7 @@ import PropertyImageGallery from '@/components/property/PropertyImageGallery';
 import PropertyViewTracker from '@/components/property/PropertyViewTracker';
 import ShareButton from '@/components/property/ShareButton';
 import SaveButton from '@/components/property/SaveButton';
+import InquiryButton from '@/components/property/InquiryButton';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Plumbing:           '🔧',
@@ -195,17 +196,20 @@ export default async function PropertyDetailPage({
           </div>
         )}
 
-        {/* Desktop WhatsApp button (inline) */}
-        {whatsappUrl && (
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-          >
-            💬 Contact on WhatsApp
-          </a>
-        )}
+        {/* Desktop contact buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <InquiryButton propertyId={property.id} propertyTitle={property.title} />
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            >
+              💬 Contact on WhatsApp
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Mobile sticky WhatsApp bar */}
