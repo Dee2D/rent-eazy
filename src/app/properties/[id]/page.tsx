@@ -24,6 +24,7 @@ import MapViewClient from '@/components/map/MapViewClient';
 import PropertyImageGallery from '@/components/property/PropertyImageGallery';
 import PropertyViewTracker from '@/components/property/PropertyViewTracker';
 import ShareButton from '@/components/property/ShareButton';
+import SaveButton from '@/components/property/SaveButton';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Plumbing:           '🔧',
@@ -167,7 +168,10 @@ export default async function PropertyDetailPage({
               <p className="text-xl font-bold text-orange-500">{formatUGX(property.price_ugx)}</p>
               <p className="text-stone-400 dark:text-slate-500 text-xs">{formatPeriod(property.payment_period)}</p>
             </div>
-            <ShareButton title={property.title} url={pageUrl} />
+            <div className="flex items-center gap-2">
+              <SaveButton propertyId={property.id} initialSaved={false} checkOnMount={true} />
+              <ShareButton title={property.title} url={pageUrl} />
+            </div>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Heart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
@@ -53,6 +53,13 @@ export default function Navbar() {
                     onClick={() => setDropdownOpen(false)}
                   >
                     <LayoutDashboard size={14} /> Dashboard
+                  </Link>
+                  <Link
+                    href="/dashboard/saved"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-stone-700 dark:text-slate-200 hover:bg-orange-50 dark:hover:bg-slate-700 hover:text-orange-600 dark:hover:text-orange-400"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <Heart size={14} /> Saved Properties
                   </Link>
                   <button
                     onClick={() => { signOut(); setDropdownOpen(false); }}

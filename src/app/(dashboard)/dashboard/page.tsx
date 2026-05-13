@@ -24,6 +24,7 @@ export default async function DashboardPage() {
   }
 
   const activeListings = properties.filter((p) => p.is_active).length;
+  const totalViews = properties.reduce((sum, p) => sum + (p.view_count ?? 0), 0);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -40,8 +41,8 @@ export default async function DashboardPage() {
         </div>
         <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm transition-colors">
           <p className="text-xs text-stone-400 dark:text-slate-500 font-medium uppercase tracking-wide">Total Views</p>
-          <p className="text-3xl font-bold text-stone-900 dark:text-white mt-1">—</p>
-          <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">Coming soon</p>
+          <p className="text-3xl font-bold text-stone-900 dark:text-white mt-1">{totalViews.toLocaleString()}</p>
+          <p className="text-xs text-stone-400 dark:text-slate-500 mt-0.5">Across all listings</p>
         </div>
         <div className="bg-white dark:bg-slate-800 border border-stone-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm transition-colors">
           <p className="text-xs text-stone-400 dark:text-slate-500 font-medium uppercase tracking-wide">Payments Made</p>
