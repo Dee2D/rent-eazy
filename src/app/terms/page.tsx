@@ -35,7 +35,7 @@ export default function TermsPage() {
 
         <Section title="1. Introduction and Acceptance">
           <p>
-            Welcome to <strong>Rent Eazy</strong> ("the Platform", "we", "us", or "our"), a property rental and service
+            Welcome to <strong>Rent Eazy</strong> (&quot;the Platform&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), a property rental and service
             marketplace operated in Uganda. By creating an account, listing a property, subscribing as a service provider,
             or otherwise accessing or using the Platform, you agree to be bound by these Terms &amp; Conditions.
           </p>
@@ -82,7 +82,7 @@ export default function TermsPage() {
             <li>Use the Platform only for lawful purposes in compliance with Ugandan law.</li>
             <li>Provide accurate information in all listings, profiles, and communications.</li>
             <li>Treat other users with respect and professionalism.</li>
-            <li>Not attempt to circumvent or hack the Platform's security measures.</li>
+            <li>Not attempt to circumvent or hack the Platform&apos;s security measures.</li>
             <li>Not use automated tools, bots, or scrapers without written permission.</li>
             <li>Not use the Platform to harass, threaten, or defraud other users.</li>
           </ul>
@@ -160,7 +160,7 @@ export default function TermsPage() {
           </p>
           <p>
             You warrant that you own or have the right to publish all content you submit, and that the content does
-            not infringe any third party's intellectual property rights.
+            not infringe any third party&apos;s intellectual property rights.
           </p>
         </Section>
 
@@ -174,7 +174,7 @@ export default function TermsPage() {
 
         <Section title="12. Limitation of Liability">
           <p>
-            Rent Eazy provides the Platform on an "as is" basis. To the maximum extent permitted by Ugandan law, we
+            Rent Eazy provides the Platform on an &quot;as is&quot; basis. To the maximum extent permitted by Ugandan law, we
             disclaim all warranties, express or implied, including fitness for a particular purpose.
           </p>
           <p>

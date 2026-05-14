@@ -3,7 +3,6 @@ import { createServiceRoleClient, createClient } from '@/lib/supabase/server';
 import { checkTrialStatus } from '@/lib/supabase/trial';
 import { isValidUUID } from '@/lib/security';
 import { writeAuditLog } from '@/lib/audit';
-import type { PaymentType } from '@/types';
 
 export async function POST(request: NextRequest) {
   // Authenticate — must be logged in to activate trial benefits

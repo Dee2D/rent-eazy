@@ -62,7 +62,7 @@ async function logLoginAttempt(opts: {
   });
 }
 
-async function detectSuspiciousActivity(ip: string, email: string): Promise<boolean> {
+async function detectSuspiciousActivity(ip: string, _email: string): Promise<boolean> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return false;
@@ -152,7 +152,6 @@ export async function POST(request: NextRequest) {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
   const cookiesToSet: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
-  const response = NextResponse.json({ success: false }); // placeholder — replaced below
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {

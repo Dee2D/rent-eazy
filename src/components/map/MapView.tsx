@@ -13,7 +13,6 @@ const MAP_STYLES = {
 
 interface MapViewProps {
   markers: MapMarker[];
-  height?: string;
   interactive?: boolean;
   theme?: 'light' | 'dark';
   flyTo?: [number, number] | null;
@@ -49,7 +48,6 @@ function buildPopupHtml(marker: MapMarker): string {
 
 export default function MapView({
   markers,
-  height = '100%',
   interactive = true,
   theme = 'light',
   flyTo = null,

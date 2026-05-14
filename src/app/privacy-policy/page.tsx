@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
 
         <Section title="1. Who We Are">
           <p>
-            Rent Eazy ("we", "us", "our") is a property rental and services marketplace based in Uganda.
+            Rent Eazy (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is a property rental and services marketplace based in Uganda.
             We operate the Platform at <span className="font-mono text-xs bg-stone-100 dark:bg-slate-700 px-1 rounded">rent-eazy.vercel.app</span>.
           </p>
           <p>
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
             <li>Process payments and maintain transaction records.</li>
             <li>Send transactional emails (account confirmation, payment receipts, trial reminders).</li>
             <li>Enforce our Terms &amp; Conditions and prevent fraud.</li>
-            <li>Improve the Platform's performance and user experience through analytics.</li>
+            <li>Improve the Platform&apos;s performance and user experience through analytics.</li>
             <li>Comply with legal obligations under Ugandan law.</li>
           </ul>
           <p>
@@ -107,8 +107,8 @@ export default function PrivacyPolicyPage() {
             find properties near them.
           </p>
           <p>
-            We do not track your device's real-time GPS location. The map tool on the Platform uses Mapbox, which may
-            collect anonymised usage data as described in Mapbox's privacy policy.
+            We do not track your device&apos;s real-time GPS location. The map tool on the Platform uses Mapbox, which may
+            collect anonymised usage data as described in Mapbox&apos;s privacy policy.
           </p>
         </Section>
 
@@ -130,7 +130,7 @@ export default function PrivacyPolicyPage() {
           <p className="font-semibold text-stone-700 dark:text-slate-300 mt-2">Managing Cookies</p>
           <p>
             You can manage or disable non-essential cookies via the cookie banner shown on your first visit, or
-            through your browser's settings.
+            through your browser&apos;s settings.
           </p>
         </Section>
 
@@ -149,7 +149,7 @@ export default function PrivacyPolicyPage() {
           <p>We use the following third-party services, each with their own privacy policies:</p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong>Supabase</strong> — database and authentication provider. Your data is stored on Supabase's
+              <strong>Supabase</strong> — database and authentication provider. Your data is stored on Supabase&apos;s
               servers (hosted on AWS). Supabase does not access your data except to provide the hosting service.
             </li>
             <li>

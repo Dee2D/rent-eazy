@@ -17,8 +17,8 @@ export default function HomeLayout({ carousel, map }: HomeLayoutProps) {
   const [mapMounted, setMapMounted] = useState(false);
 
   useEffect(() => {
-    // Mount immediately on desktop (md ≥ 768px)
-    if (window.innerWidth >= 768) setMapMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (window.innerWidth >= 768) setMapMounted(true); // one-time SSR-safe window init
   }, []);
 
   function handleShowMap() {

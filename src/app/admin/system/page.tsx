@@ -22,6 +22,10 @@ async function requireAdmin() {
   if (profile?.role !== 'admin') redirect('/dashboard');
 }
 
+function calcBackupAgeHours(completedAt: string): number {
+  return Math.round((Date.now() - new Date(completedAt).getTime()) / 3_600_000);
+}
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { cls: string; icon: React.ReactNode }> = {
     completed: { cls: 'bg-green-500/20 text-green-400', icon: <CheckCircle size={13} /> },
@@ -63,7 +67,7 @@ export default async function SystemPage() {
 
   const backup = health.lastBackup;
   const backupAge = backup?.completed_at
-    ? Math.round((Date.now() - new Date(backup.completed_at).getTime()) / 3_600_000)
+    ? calcBackupAgeHours(backup.completed_at)
     : null;
 
   return (

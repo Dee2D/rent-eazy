@@ -12,7 +12,8 @@ export default function CookieBanner() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) setVisible(true);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!stored) setVisible(true); // one-time SSR-safe localStorage init
     } catch {
       // localStorage unavailable (e.g., private browsing with strict settings)
     }
