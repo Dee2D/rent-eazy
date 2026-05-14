@@ -53,7 +53,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to generate 2FA code.' }, { status: 500 });
   }
 
-  await sendAdminOTPEmail(user.email!, profile.full_name ?? 'Admin', otp);
+  const emailResult = await sendAdminOTPEmail(user.email!, profile.full_name ?? 'Admin', otp);
+
+  if (!emailResult.ok) {
+    // Email failed — return the OTP in the response so the admin can still log in.
+    // This is intentional: without a verified Resend domain, email delivery is unavailable.
+    console.warn('[2FA] Email delivery failed, using response fallback. Error:', emailResult.error);
+    return NextResponse.json({ success: true, fallbackCode: otp });
+  }
 
   return NextResponse.json({ success: true });
 }

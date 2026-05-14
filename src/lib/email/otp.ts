@@ -1,14 +1,14 @@
-/** Send a 2FA/OTP verification email to an admin. */
+/** Send a 2FA/OTP verification email to an admin.
+ *  Returns { ok: true } on success or { ok: false, error } on failure. */
 export async function sendAdminOTPEmail(
   email: string,
   name: string,
   otp: string,
-): Promise<void> {
+): Promise<{ ok: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    // Dev fallback — log to console so devs can still test 2FA
     console.info(`[2FA OTP] ${email}: ${otp}`);
-    return;
+    return { ok: false, error: 'RESEND_API_KEY not configured' };
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://rent-eazy.vercel.app';
@@ -50,16 +50,27 @@ export async function sendAdminOTPEmail(
 </body>
 </html>`;
 
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: 'Rent Eazy Security <security@renteazy.com>',
-      to: [email],
-      subject: `${otp} — Admin 2FA Code`,
-      html,
-    }),
-  }).catch((err) => {
-    console.error('[2FA email] Failed to send OTP email:', err);
-  });
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Rent Eazy <onboarding@resend.dev>',
+        to: [email],
+        subject: `${otp} — Admin 2FA Code`,
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      console.error('[2FA email] Resend error:', body);
+      return { ok: false, error: (body as { message?: string }).message ?? `HTTP ${res.status}` };
+    }
+
+    return { ok: true };
+  } catch (err) {
+    console.error('[2FA email] Network error:', err);
+    return { ok: false, error: String(err) };
+  }
 }

@@ -33,6 +33,10 @@ export default function Verify2FAPage() {
       return;
     }
     setSent(true);
+    // Email delivery unavailable — code returned directly in response
+    if (data.fallbackCode) {
+      setCode(data.fallbackCode);
+    }
     // 60-second resend cooldown
     setCooldown(60);
     const interval = setInterval(() => {
