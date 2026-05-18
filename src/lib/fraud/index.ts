@@ -88,7 +88,7 @@ export async function assessListing(input: ListingInput): Promise<FraudSignal> {
         .select('id', { count: 'exact', head: true })
         .eq('landlord_id', input.landlordId)
         .eq('district', input.district)
-        .eq('price', input.priceUGX)
+        .eq('price_ugx', input.priceUGX)
         .gte('created_at', since);
 
       if ((count ?? 0) >= 2) {

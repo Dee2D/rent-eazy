@@ -4,7 +4,7 @@ import { verifyAdmin } from '@/lib/supabase/verify-admin';
 import { writeAuditLog } from '@/lib/audit';
 import type { UserRole } from '@/types';
 
-const ALLOWED_ROLES: UserRole[] = ['tenant', 'landlord', 'provider', 'admin'];
+const ALLOWED_ROLES: UserRole[] = ['tenant', 'landlord', 'provider', 'admin']; // 'deactivated' handled by separate deactivate/ban actions
 
 export async function PATCH(
   request: NextRequest,
@@ -34,7 +34,7 @@ export async function PATCH(
     // Note: Supabase Auth account remains — only platform access is blocked via role check
     const { error } = await supabase
       .from('profiles')
-      .update({ role: 'deactivated' as UserRole })
+      .update({ role: 'deactivated' })
       .eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     await writeAuditLog('user.deactivated', 'profile', id, admin.id);
@@ -51,10 +51,12 @@ export async function PATCH(
 
   if (body.action === 'ban') {
     // Deactivate profile AND pull all their listings immediately
-    await Promise.all([
-      supabase.from('profiles').update({ role: 'deactivated' as UserRole }).eq('id', id),
+    const [{ error: banErr }, { error: listingErr }] = await Promise.all([
+      supabase.from('profiles').update({ role: 'deactivated' }).eq('id', id),
       supabase.from('properties').update({ is_active: false }).eq('landlord_id', id),
     ]);
+    if (banErr) return NextResponse.json({ error: banErr.message }, { status: 500 });
+    if (listingErr) return NextResponse.json({ error: listingErr.message }, { status: 500 });
     await writeAuditLog('user.banned', 'profile', id, admin.id);
   }
 

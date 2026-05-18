@@ -56,10 +56,8 @@ export async function POST(request: NextRequest) {
   const emailResult = await sendAdminOTPEmail(user.email!, profile.full_name ?? 'Admin', otp);
 
   if (!emailResult.ok) {
-    // Email failed — return the OTP in the response so the admin can still log in.
-    // This is intentional: without a verified Resend domain, email delivery is unavailable.
-    console.warn('[2FA] Email delivery failed, using response fallback. Error:', emailResult.error);
-    return NextResponse.json({ success: true, fallbackCode: otp });
+    console.error('[2FA] Email delivery failed:', emailResult.error);
+    return NextResponse.json({ error: 'Failed to send 2FA code. Check email configuration.' }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

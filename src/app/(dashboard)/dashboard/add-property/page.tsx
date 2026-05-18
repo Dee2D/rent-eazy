@@ -110,9 +110,10 @@ function AddPropertyForm() {
     return true;
   }
 
-  async function uploadImages(propertyId: string, userId: string): Promise<string[]> {
+  async function uploadImages(propertyId: string, userId: string): Promise<{ urls: string[]; failedCount: number }> {
     const supabase = createClient();
     const urls: string[] = [];
+    let failedCount = 0;
 
     for (const file of images) {
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
@@ -123,7 +124,7 @@ function AddPropertyForm() {
         .upload(path, file, { upsert: true });
 
       if (uploadError) {
-        console.warn('Image upload failed:', uploadError.message);
+        failedCount++;
         continue;
       }
 
@@ -134,7 +135,7 @@ function AddPropertyForm() {
       urls.push(publicUrl);
     }
 
-    return urls;
+    return { urls, failedCount };
   }
 
   const trial = checkTrialStatus(profile?.trial_end_date);
@@ -193,7 +194,7 @@ function AddPropertyForm() {
         if (updateError) throw new Error(updateError.message);
 
         if (images.length > 0) {
-          const imageUrls = await uploadImages(editId!, user.id);
+          const { urls: imageUrls, failedCount } = await uploadImages(editId!, user.id);
           if (imageUrls.length > 0) {
             const imageRows = imageUrls.map((url) => ({
               property_id: editId,
@@ -201,6 +202,11 @@ function AddPropertyForm() {
               is_primary: false,
             }));
             await supabase.from('property_images').insert(imageRows);
+          }
+          if (failedCount > 0) {
+            setError(`Property saved, but ${failedCount} image(s) failed to upload. You can add them by editing the listing.`);
+            setLoading(false);
+            return;
           }
         }
 
@@ -218,7 +224,7 @@ function AddPropertyForm() {
 
         if (propError) throw new Error(propError.message);
 
-        const imageUrls = await uploadImages(property.id, user.id);
+        const { urls: imageUrls, failedCount } = await uploadImages(property.id, user.id);
         if (imageUrls.length > 0) {
           const imageRows = imageUrls.map((url, i) => ({
             property_id: property.id,
@@ -226,6 +232,11 @@ function AddPropertyForm() {
             is_primary: i === 0,
           }));
           await supabase.from('property_images').insert(imageRows);
+        }
+        if (failedCount > 0) {
+          setError(`Property saved, but ${failedCount} image(s) failed to upload. You can add them by editing the listing.`);
+          setLoading(false);
+          return;
         }
 
         if (trial.isOnTrial) {

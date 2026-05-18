@@ -1,4 +1,4 @@
-export type UserRole = 'tenant' | 'landlord' | 'provider' | 'admin';
+export type UserRole = 'tenant' | 'landlord' | 'provider' | 'admin' | 'deactivated';
 export type PaymentPeriod = 'monthly' | '6_months' | 'yearly';
 export type PropertyType = 'apartment' | 'house' | 'bedsitter';
 export type ListingType = 'landlord' | 'broker' | 'agent';
