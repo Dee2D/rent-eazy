@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getProviderByProfileId, getServiceCategories } from '@/lib/supabase/providers';
+import { getProviderByProfileId, getServiceCategories, getProviderAnalytics } from '@/lib/supabase/providers';
 import ProviderClient from './ProviderClient';
 import TrialStatusCard from '@/components/trial/TrialStatusCard';
 import PhoneVerification from '@/components/security/PhoneVerification';
-import type { Profile } from '@/types';
+import type { Profile, ProviderAnalyticsSummary } from '@/types';
 
 export default async function ProviderDashboardPage() {
   const supabase = await createClient();
@@ -16,6 +16,7 @@ export default async function ProviderDashboardPage() {
   let provider = null;
   let categories: Awaited<ReturnType<typeof getServiceCategories>> = [];
   let subscription = null;
+  let analytics: ProviderAnalyticsSummary | null = null;
 
   try {
     [provider, categories] = await Promise.all([
@@ -24,16 +25,22 @@ export default async function ProviderDashboardPage() {
     ]);
 
     if (provider) {
-      const { data } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('provider_id', provider.id)
-        .eq('is_active', true)
-        .gt('end_date', new Date().toISOString())
-        .order('end_date', { ascending: false })
-        .limit(1)
-        .single();
-      subscription = data;
+      const [subscriptionResult, analyticsResult] = await Promise.allSettled([
+        supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('provider_id', provider.id)
+          .eq('is_active', true)
+          .gt('end_date', new Date().toISOString())
+          .order('end_date', { ascending: false })
+          .limit(1)
+          .single()
+          .then(({ data }) => data),
+        getProviderAnalytics(provider.id, user.id),
+      ]);
+
+      if (subscriptionResult.status === 'fulfilled') subscription = subscriptionResult.value;
+      if (analyticsResult.status === 'fulfilled') analytics = analyticsResult.value;
     }
   } catch {
     // DB not configured
@@ -63,6 +70,7 @@ export default async function ProviderDashboardPage() {
           categories={categories}
           subscription={subscription}
           trialEndDate={profile?.trial_end_date ?? null}
+          analytics={analytics}
         />
       ) : (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 text-sm text-amber-700 dark:text-amber-300">

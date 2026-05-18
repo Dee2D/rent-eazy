@@ -32,9 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    providerRoutes = providerSlugs.map(({ slug }) => ({
-      url: `${APP_URL}/providers/${slug}`,
-      lastModified: now,
+    providerRoutes = providerSlugs.map(({ slug, updated_at }) => ({
+      url: `${APP_URL}/services/provider/${slug}`,
+      lastModified: updated_at ? new Date(updated_at) : now,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     }));

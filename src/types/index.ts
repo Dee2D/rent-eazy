@@ -101,6 +101,9 @@ export interface ServiceCategory {
   name: string;
 }
 
+export type AvailabilityStatus = 'available' | 'busy' | 'offline';
+export type VerificationStatus = 'unverified' | 'verified' | 'featured';
+
 export interface ServiceProvider {
   id: string;
   profile_id: string;
@@ -112,8 +115,46 @@ export interface ServiceProvider {
   area_name: string;
   is_visible: boolean;
   slug: string | null;
+  // Enhanced profile fields
+  headline: string | null;
+  provider_bio: string | null;
+  profile_image: string | null;
+  gallery_images: string[];
+  service_tags: string[];
+  service_locations: string[];
+  availability_status: AvailabilityStatus;
+  years_active: number | null;
+  response_time_hours: number;
+  verification_status: VerificationStatus;
+  featured_provider: boolean;
+  rating_average: number;
+  review_count: number;
+  profile_views: number;
+  seo_title: string | null;
+  seo_description: string | null;
+  created_at: string;
+  updated_at: string | null;
   profiles?: Profile;
   service_categories?: ServiceCategory;
+}
+
+export interface ProviderReview {
+  id: string;
+  provider_id: string;
+  reviewer_id: string;
+  rating: number;
+  comment: string | null;
+  is_hidden: boolean;
+  created_at: string;
+  profiles?: { full_name: string };
+}
+
+export interface ProviderAnalyticsSummary {
+  total_views: number;
+  whatsapp_clicks: number;
+  call_clicks: number;
+  views_last_30d: number;
+  clicks_last_30d: number;
 }
 
 export interface Subscription {
