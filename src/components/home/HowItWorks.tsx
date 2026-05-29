@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Eye, MessageCircle, Upload, CheckCircle, Zap } from 'lucide-react';
+import Link from 'next/link';
+import { Search, Eye, MessageCircle, Upload, CheckCircle, Zap, Wrench, Star, PhoneCall } from 'lucide-react';
 
 const TENANT_STEPS = [
   {
@@ -51,9 +52,74 @@ const LANDLORD_STEPS = [
   },
 ];
 
+const CLIENT_STEPS = [
+  {
+    icon: Wrench,
+    title: 'Browse by Category',
+    text: 'Find plumbers, electricians, cleaners, painters, and more — filtered by your location.',
+    color: 'bg-sky-50 dark:bg-sky-900/20',
+    iconColor: 'text-sky-500',
+  },
+  {
+    icon: Star,
+    title: 'View Profiles & Ratings',
+    text: 'Check photos, ratings, reviews, and service areas before you commit to anyone.',
+    color: 'bg-amber-50 dark:bg-amber-900/20',
+    iconColor: 'text-amber-500',
+  },
+  {
+    icon: PhoneCall,
+    title: 'Hire Directly',
+    text: 'Reach providers instantly via WhatsApp or phone call — no middleman, no delay.',
+    color: 'bg-emerald-50 dark:bg-emerald-900/20',
+    iconColor: 'text-emerald-500',
+  },
+];
+
+const PROVIDER_STEPS = [
+  {
+    icon: Upload,
+    title: 'Build Your Profile',
+    text: 'Sign up, describe your services, add photos of your work, and set your service areas.',
+    color: 'bg-sky-50 dark:bg-sky-900/20',
+    iconColor: 'text-sky-500',
+  },
+  {
+    icon: Zap,
+    title: 'Show Up on the Map',
+    text: 'Get discovered by customers actively searching for your type of service in your area.',
+    color: 'bg-violet-50 dark:bg-violet-900/20',
+    iconColor: 'text-violet-500',
+  },
+  {
+    icon: Star,
+    title: 'Grow Your Business',
+    text: 'Earn reviews, build your reputation, and receive steady inquiries through your dashboard.',
+    color: 'bg-emerald-50 dark:bg-emerald-900/20',
+    iconColor: 'text-emerald-500',
+  },
+];
+
+type Tab = 'tenant' | 'landlord' | 'client' | 'provider';
+
+const TABS: { id: Tab; label: string; cta: { label: string; href: string } }[] = [
+  { id: 'tenant',   label: "I'm a Tenant",          cta: { label: 'Browse Properties', href: '/properties' } },
+  { id: 'landlord', label: "I'm a Landlord",         cta: { label: 'List a Property',   href: '/register' } },
+  { id: 'client',   label: 'Looking for Services',   cta: { label: 'Find Services',     href: '/services' } },
+  { id: 'provider', label: "I'm a Service Provider", cta: { label: 'Join as Provider',  href: '/register' } },
+];
+
+const STEPS: Record<Tab, typeof TENANT_STEPS> = {
+  tenant:   TENANT_STEPS,
+  landlord: LANDLORD_STEPS,
+  client:   CLIENT_STEPS,
+  provider: PROVIDER_STEPS,
+};
+
 export default function HowItWorks() {
-  const [tab, setTab] = useState<'tenant' | 'landlord'>('tenant');
-  const steps = tab === 'tenant' ? TENANT_STEPS : LANDLORD_STEPS;
+  const [tab, setTab] = useState<Tab>('tenant');
+  const steps = STEPS[tab];
+  const activeCta = TABS.find((t) => t.id === tab)!.cta;
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-10 md:py-14">
@@ -66,31 +132,24 @@ export default function HowItWorks() {
           How It Works
         </h2>
         <p className="text-stone-500 dark:text-slate-400 text-sm md:text-base mb-6">
-          Simple steps to find your home or let your property
+          Whether you&apos;re renting, letting, hiring, or offering — we&apos;ve got you covered
         </p>
 
-        {/* Tab toggle */}
-        <div className="inline-flex bg-stone-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
-          <button
-            onClick={() => setTab('tenant')}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-              tab === 'tenant'
-                ? 'bg-white dark:bg-slate-700 text-orange-500 shadow-sm'
-                : 'text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200'
-            }`}
-          >
-            I&apos;m a Tenant
-          </button>
-          <button
-            onClick={() => setTab('landlord')}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
-              tab === 'landlord'
-                ? 'bg-white dark:bg-slate-700 text-orange-500 shadow-sm'
-                : 'text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200'
-            }`}
-          >
-            I&apos;m a Landlord
-          </button>
+        {/* Tab row — wraps on mobile */}
+        <div className="inline-flex flex-wrap justify-center bg-stone-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
+          {TABS.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                tab === id
+                  ? 'bg-white dark:bg-slate-700 text-orange-500 shadow-sm'
+                  : 'text-stone-500 dark:text-slate-400 hover:text-stone-700 dark:hover:text-slate-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -124,6 +183,19 @@ export default function HowItWorks() {
             </div>
           );
         })}
+      </div>
+
+      {/* Contextual CTA under the steps */}
+      <div className="mt-7 text-center">
+        <Link
+          href={activeCta.href}
+          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-7 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm"
+        >
+          {activeCta.label}
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </Link>
       </div>
 
     </section>
