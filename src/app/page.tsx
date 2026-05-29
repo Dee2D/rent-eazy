@@ -1,9 +1,12 @@
 import { getActiveProperties } from '@/lib/supabase/properties';
 import { getVisibleProviders } from '@/lib/supabase/providers';
 import type { MapMarker, Property } from '@/types';
-import IntroCarousel from '@/components/home/IntroCarousel';
-import MapPanel from '@/components/home/MapPanel';
-import HomeLayout from '@/components/home/HomeLayout';
+import HeroSection from '@/components/home/HeroSection';
+import LiveStatsBar from '@/components/home/LiveStatsBar';
+import MapSection from '@/components/home/MapSection';
+import FeaturedProperties from '@/components/home/FeaturedProperties';
+import HowItWorks from '@/components/home/HowItWorks';
+import LandlordCTA from '@/components/home/LandlordCTA';
 
 export default async function HomePage() {
   let properties: Property[] = [];
@@ -27,18 +30,20 @@ export default async function HomePage() {
       linkHref: '/services',
     }));
   } catch {
-    // DB not configured — show empty map
+    // DB not configured — show empty sections
   }
 
-  const stats = {
-    properties: properties.length,
-    providers: providerMarkers.length,
-  };
+  const stats = { properties: properties.length, providers: providerMarkers.length };
+  const featuredProperties = properties.slice(0, 6);
 
   return (
-    <HomeLayout
-      carousel={<IntroCarousel stats={stats} />}
-      map={<MapPanel initialProperties={properties} providerMarkers={providerMarkers} />}
-    />
+    <>
+      <HeroSection />
+      <LiveStatsBar stats={stats} />
+      <MapSection initialProperties={properties} providerMarkers={providerMarkers} />
+      <FeaturedProperties properties={featuredProperties} />
+      <HowItWorks />
+      <LandlordCTA />
+    </>
   );
 }

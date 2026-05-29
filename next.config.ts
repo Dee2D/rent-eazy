@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     ],
     // Serve optimized images in modern formats (WebP/AVIF) automatically
     formats: ["image/webp", "image/avif"],
+    qualities: [75, 85],
     // Minimum cache TTL for optimised images — 7 days
     minimumCacheTTL: 604800,
     // Reasonable device widths for responsive images (includes common Uganda Android resolutions)
