@@ -8,8 +8,8 @@ import FeaturedProperties from '@/components/home/FeaturedProperties';
 import HowItWorks from '@/components/home/HowItWorks';
 import LandlordCTA from '@/components/home/LandlordCTA';
 
-// Revalidate every 5 minutes so stats and featured listings stay fresh
-export const revalidate = 300;
+// Always server-render so live listings and stats are never stale
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   let properties: Property[] = [];
