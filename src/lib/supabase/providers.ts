@@ -17,7 +17,6 @@ export async function getVisibleProviders(
     .from('service_providers')
     .select(PROVIDER_SELECT)
     .eq('is_visible', true)
-    .order('featured_provider', { ascending: false })
     .order('rating_average', { ascending: false });
 
   if (filters?.district)   query = query.eq('district', filters.district);

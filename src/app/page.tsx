@@ -15,15 +15,15 @@ export default async function HomePage() {
   let properties: Property[] = [];
   let providerMarkers: MapMarker[] = [];
 
-  try {
-    const [fetchedProperties, providers] = await Promise.all([
-      getActiveProperties(),
-      getVisibleProviders(),
-    ]);
+  const [propsResult, providersResult] = await Promise.allSettled([
+    getActiveProperties(),
+    getVisibleProviders(),
+  ]);
 
-    properties = fetchedProperties;
+  if (propsResult.status === 'fulfilled') properties = propsResult.value;
 
-    providerMarkers = providers.map((pr) => ({
+  if (providersResult.status === 'fulfilled') {
+    providerMarkers = providersResult.value.map((pr) => ({
       id: pr.id,
       latitude: pr.latitude,
       longitude: pr.longitude,
@@ -32,8 +32,6 @@ export default async function HomePage() {
       subtitle: pr.service_categories?.name ?? 'Services',
       linkHref: '/services',
     }));
-  } catch {
-    // DB not configured — show empty sections
   }
 
   const stats = { properties: properties.length, providers: providerMarkers.length };
