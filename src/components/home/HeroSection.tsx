@@ -20,6 +20,13 @@ export default function HeroSection() {
     return () => clearInterval(timer);
   }, []);
 
+  // Preload the next slide's image so the crossfade has no blank-flash on slow connections
+  useEffect(() => {
+    const nextSrc = HERO_IMAGES[(current + 1) % HERO_IMAGES.length].src;
+    const img = new window.Image();
+    img.src = nextSrc;
+  }, [current]);
+
   return (
     <section className="relative min-h-[72vh] md:min-h-[78vh] flex items-center overflow-hidden">
       {/* Background image crossfade */}

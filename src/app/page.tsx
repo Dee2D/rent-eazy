@@ -8,8 +8,8 @@ import FeaturedProperties from '@/components/home/FeaturedProperties';
 import HowItWorks from '@/components/home/HowItWorks';
 import LandlordCTA from '@/components/home/LandlordCTA';
 
-// Always server-render so live listings and stats are never stale
-export const dynamic = 'force-dynamic';
+// Revalidate every 60 s — fresh enough for a marketplace, avoids per-request DB pressure
+export const revalidate = 60;
 
 export default async function HomePage() {
   let properties: Property[] = [];
@@ -20,7 +20,11 @@ export default async function HomePage() {
     getVisibleProviders(),
   ]);
 
-  if (propsResult.status === 'fulfilled') properties = propsResult.value;
+  if (propsResult.status === 'fulfilled') {
+    properties = propsResult.value;
+  } else {
+    console.error('[homepage] getActiveProperties failed:', propsResult.reason);
+  }
 
   if (providersResult.status === 'fulfilled') {
     providerMarkers = providersResult.value.map((pr) => ({
@@ -32,6 +36,8 @@ export default async function HomePage() {
       subtitle: pr.service_categories?.name ?? 'Services',
       linkHref: '/services',
     }));
+  } else {
+    console.error('[homepage] getVisibleProviders failed:', providersResult.reason);
   }
 
   const stats = { properties: properties.length, providers: providerMarkers.length };

@@ -1,19 +1,22 @@
 import { createClient, createPublicClient } from './server';
+import { withRetry } from '@/lib/retry';
 import type { Property, PropertyFilters } from '@/types';
 
 export const PROPERTIES_PAGE_SIZE = 12;
 
 export async function getActiveProperties(): Promise<Property[]> {
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from('properties')
-    .select('*, property_images(*), profiles(full_name, phone_number)')
-    .eq('is_active', true)
-    .gt('expires_at', new Date().toISOString())
-    .order('created_at', { ascending: false });
+  return withRetry(async () => {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('properties')
+      .select('*, property_images(*), profiles(full_name, phone_number)')
+      .eq('is_active', true)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false });
 
-  if (error) throw new Error(error.message);
-  return (data as Property[]) ?? [];
+    if (error) throw new Error(error.message);
+    return (data as Property[]) ?? [];
+  });
 }
 
 export async function getFilteredProperties(filters: PropertyFilters): Promise<Property[]> {
@@ -28,7 +31,7 @@ export async function getFilteredProperties(filters: PropertyFilters): Promise<P
   if (filters.area_name) query = query.ilike('area_name', `%${filters.area_name}%`);
   if (filters.min_price) query = query.gte('price_ugx', filters.min_price);
   if (filters.max_price) query = query.lte('price_ugx', filters.max_price);
-  if (filters.bedrooms) query = query.eq('bedrooms', filters.bedrooms);
+  if (filters.bedrooms != null) query = query.eq('bedrooms', filters.bedrooms);
   if (filters.property_type) query = query.eq('property_type', filters.property_type);
 
   const { data, error } = await query.order('created_at', { ascending: false });
@@ -59,7 +62,7 @@ export async function getFilteredPropertiesPaginated(
   if (filters.area_name) query = query.ilike('area_name', `%${filters.area_name}%`);
   if (filters.min_price) query = query.gte('price_ugx', filters.min_price);
   if (filters.max_price) query = query.lte('price_ugx', filters.max_price);
-  if (filters.bedrooms) query = query.eq('bedrooms', filters.bedrooms);
+  if (filters.bedrooms != null) query = query.eq('bedrooms', filters.bedrooms);
   if (filters.property_type) query = query.eq('property_type', filters.property_type);
 
   const { data, error, count } = await query

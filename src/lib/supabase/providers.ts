@@ -1,4 +1,5 @@
 import { createClient, createPublicClient, createServiceRoleClient } from './server';
+import { withRetry } from '@/lib/retry';
 import type { ServiceProvider, ServiceCategory, ProviderReview, ProviderAnalyticsSummary } from '@/types';
 import { slugifyText } from '@/lib/utils';
 
@@ -12,19 +13,22 @@ const PROVIDER_SELECT = `
 export async function getVisibleProviders(
   filters?: { district?: string; area_name?: string; category?: string }
 ): Promise<ServiceProvider[]> {
-  const supabase = createPublicClient();
-  let query = supabase
-    .from('service_providers')
-    .select(PROVIDER_SELECT)
-    .eq('is_visible', true)
-    .order('rating_average', { ascending: false });
+  return withRetry(async () => {
+    const supabase = createPublicClient();
+    let query = supabase
+      .from('service_providers')
+      .select(PROVIDER_SELECT)
+      .eq('is_visible', true)
+      .order('featured_provider', { ascending: false })
+      .order('rating_average', { ascending: false });
 
-  if (filters?.district)   query = query.eq('district', filters.district);
-  if (filters?.area_name)  query = query.ilike('area_name', `%${filters.area_name}%`);
+    if (filters?.district)   query = query.eq('district', filters.district);
+    if (filters?.area_name)  query = query.ilike('area_name', `%${filters.area_name}%`);
 
-  const { data, error } = await query;
-  if (error) throw new Error(error.message);
-  return (data as ServiceProvider[]) ?? [];
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return (data as ServiceProvider[]) ?? [];
+  });
 }
 
 export async function getServiceCategories(): Promise<ServiceCategory[]> {
@@ -178,7 +182,7 @@ export async function getProvidersNearProperty(
     .from('service_providers')
     .select(PROVIDER_SELECT)
     .eq('is_visible', true)
-    .or(`district.eq.${district},area_name.ilike.%${areaName}%`)
+    .or(`district.eq."${district.replace(/"/g, '""')}",area_name.ilike."%${areaName.replace(/"/g, '""')}%"`)
     .order('rating_average', { ascending: false })
     .limit(limit);
 
@@ -248,26 +252,34 @@ export async function trackProviderAnalytics(
 
 export async function getProviderAnalytics(
   providerId: string,
-  profileId: string
+  _profileId: string
 ): Promise<ProviderAnalyticsSummary> {
   const supabase = await createClient();
   const since30d = new Date(Date.now() - 30 * 86_400_000).toISOString();
 
-  // Ownership check via RLS — query will return empty if not the owner
-  const { data } = await supabase
-    .from('provider_analytics')
-    .select('event_type, created_at')
-    .eq('provider_id', providerId);
+  // Two aggregate queries rather than fetching all rows into Node memory
+  const [lifetimeRes, recentRes] = await Promise.all([
+    supabase.rpc('get_provider_analytics_summary', { p_id: providerId }),
+    supabase
+      .from('provider_analytics')
+      .select('event_type')
+      .eq('provider_id', providerId)
+      .gte('created_at', since30d),
+  ]);
 
-  const rows = data ?? [];
-  const recent = rows.filter((r) => r.created_at >= since30d);
+  // Fall back to zero-counts if RPC not yet deployed or ownership check fails
+  const lifetime = (lifetimeRes.data ?? []) as { event_type: string; count: number }[];
+  const recentRows = (recentRes.data ?? []) as { event_type: string }[];
+
+  const lifetimeCount = (type: string) =>
+    lifetime.find((r) => r.event_type === type)?.count ?? 0;
 
   return {
-    total_views:     rows.filter((r) => r.event_type === 'profile_view').length,
-    whatsapp_clicks: rows.filter((r) => r.event_type === 'whatsapp_click').length,
-    call_clicks:     rows.filter((r) => r.event_type === 'call_click').length,
-    views_last_30d:  recent.filter((r) => r.event_type === 'profile_view').length,
-    clicks_last_30d: recent.filter((r) => r.event_type !== 'profile_view').length,
+    total_views:     lifetimeCount('profile_view'),
+    whatsapp_clicks: lifetimeCount('whatsapp_click'),
+    call_clicks:     lifetimeCount('call_click'),
+    views_last_30d:  recentRows.filter((r) => r.event_type === 'profile_view').length,
+    clicks_last_30d: recentRows.filter((r) => r.event_type !== 'profile_view').length,
   };
 }
 
