@@ -1,15 +1,20 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const TurnstileWidget = dynamic(() => import('@/components/security/TurnstileWidget'), { ssr: false });
 
+const URL_ERROR_MESSAGES: Record<string, string> = {
+  auth_callback_failed: 'Email verification failed. Please try registering again or contact support.',
+};
+
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw]     = useState(false);
@@ -19,6 +24,13 @@ export default function LoginPage() {
   const turnstileTokenRef = useRef<string>('');
   const lastAttemptRef    = useRef(0);
   const COOLDOWN_MS = 2000;
+
+  useEffect(() => {
+    const urlError = searchParams.get('error');
+    if (urlError) {
+      setError(URL_ERROR_MESSAGES[urlError] ?? 'An error occurred. Please try again.');
+    }
+  }, [searchParams]);
 
   const onTurnstileVerify = useCallback((token: string) => {
     turnstileTokenRef.current = token;

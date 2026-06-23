@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { validatePassword } from '@/lib/security';
@@ -29,6 +30,7 @@ const strengthMeta: Record<PasswordStrength, { color: string; width: string; lab
 };
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [fullName, setFullName]           = useState('');
   const [email, setEmail]                 = useState('');
   const [phone, setPhone]                 = useState('');
@@ -91,6 +93,8 @@ export default function RegisterPage() {
 
     if (data.requiresConfirmation) {
       setEmailSent(true);
+    } else {
+      router.push('/dashboard');
     }
   }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
 import { checkRateLimit, getClientIp, verifyTurnstile, sanitizeText, validatePassword } from '@/lib/security';
 import type { UserRole } from '@/types';
 
@@ -48,10 +48,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'CAPTCHA verification failed. Please try again.' }, { status: 400 });
   }
 
-  const supabase = createSupabaseClient(
+  const cookiesToSet: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
+
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
+    {
+      cookies: {
+        getAll:  () => request.cookies.getAll(),
+        setAll: (cs) => { cs.forEach((c) => cookiesToSet.push(c)); },
+      },
+    }
   );
 
   const { data, error: signUpError } = await supabase.auth.signUp({
@@ -72,5 +79,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: signUpError?.message ?? 'Registration failed.' }, { status: 400 });
   }
 
-  return NextResponse.json({ success: true, requiresConfirmation: !data.session });
+  const response = NextResponse.json({ success: true, requiresConfirmation: !data.session });
+  cookiesToSet.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]);
+  });
+  return response;
 }

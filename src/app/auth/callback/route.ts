@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
             accepted_terms_at: meta.accepted_terms_at ?? null,
           },
           { onConflict: 'id', ignoreDuplicates: true }
-        );
+        ).select().maybeSingle();
 
         // Send welcome email only on first profile creation (ignoreDuplicates means
         // the upsert returns null data when the row already existed)
